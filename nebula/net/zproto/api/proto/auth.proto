@@ -1,0 +1,101 @@
+/*
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
+ *  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto3";
+package zproto;
+
+option java_package = "com.zchat.engine.zproto";
+option java_outer_classname = "ZProtoAuth";
+option optimize_for = CODE_SIZE;
+
+
+
+///////////////////////////////////////////////////////////////////////
+// Authentication
+
+// Starting token-based login
+// StartTokenAuthReq --> AuthRsp
+message TokenAuthReq {
+  // int32 COMMAND_ID = 203;
+  int32 app_key = 1; // Application Id
+  string app_token = 2; // Token for authentication
+  bytes device_hash = 3; // Hash of device unique id and app bundle id. Used for autologout users when app is reinstalled
+  string device_title = 4; // Device Title
+  string time_zone = 5; // TimeZone of device
+  
+  // 版本号等
+}
+
+// Authentication result
+message AuthRsp {
+  // int32 COMMAND_ID = 5;
+  string user_id = 2;      //   The authenticated User
+  // Config config = 3;  //   Current config of server
+}
+
+///////////////////////////////////////////////////////////////////////
+// online
+message ClientOnlineReq {
+  uint32 server_id = 1;
+  uint64 conn_id = 2;
+  uint32 app_id = 3;
+  uint32 user_id = 4;
+  uint32 state = 5;
+}
+
+message ClientOnlineRsp {
+  uint64 index_id = 1;
+}
+
+message ClientOfflineReq {
+  uint32 server_id = 1;
+  uint64 conn_id = 2;
+}
+
+message ClientOfflineRsp {
+  uint64 index_id = 1;
+}
+
+message AttachData {
+/*
+  uint16_t client_type = 0;           // 客户端类型
+  uint16_t client_version = 0;        // 客户端版本号
+  uint32_t app_id = 0;                // 通过登录时附带的app_token字段找到对应的app_id
+  uint16_t lang_type = 0;             //（国际化类型）语言类型
+  uint16_t srv_number = 0;            // 接入服务器的编号，仅服务端用，客户端设置为0
+  uint16_t srv_reserved = 0;          // 预留字段
+  uint64_t cli_handle = 0;            // 标识客户端连到接入服务器上的网络句柄，仅服务端用，客户端设置为0
+  uint32_t user_id = 0;               // 请求者的用户id，仅服务端用，客户端为0
+  uint64_t recv_timetick = 0;         // 服务端收到一条消息后设置服务端当前时间戳，用来计算每个链路的调用耗时
+  uint64_t fiber_id = 0;              // 协程ID
+  char pdu_uuid[32] = {0};            // 为每个请求生成一个全局唯一id，做为全局调用链的跟踪ID
+  char from[16] = {0};                // 从哪里来（接收到的远端IP或服务）
+  char to[16] = {0};                  // 到哪里去（发送到远端IP或服务）
+ */
+
+  // return same versions as request, 0 - version is not supported
+  uint8_t proto_revision;
+  uint8_t api_major_version;
+  uint8_t api_minor_version;
+  uint8_t client_type;
+  repeated string preferred_languages
+  //  uint32 node_id = 1;
+  //  uint64 conn_id = 2;
+  //  uint32 app_id  = 3;
+  //  uint64 user_id = 4;
+  //  string from    = 5;
+}
