@@ -15,7 +15,6 @@
 #
 
 set (SRC_LIST
-  base/attach_data_helper.h
   base/nebula_pipeline.cc
   base/nebula_pipeline.h
   base/tcp_conn_event_callback.h
