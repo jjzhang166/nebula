@@ -18,13 +18,13 @@
 #include <string>
 #include <iostream>
 
-#include "nebula/base/sys_byteorder.h"
-#include "nebula/base/testing_util.h"
-#include "nebula/net/zproto/api/api_message_box.h"
+#include "nebula/base/testing/testing_util.h"
+//#include "nebula/net/zproto/api/api_message_box.h"
 
 using namespace nebula;
 
 void TestZProto() {
+#if 0
   auto req = std::make_shared<ApiRpcRequest<teamtalk::IMLoginReq>>();
   (*req)->set_user_name("benqi@zhazha");
   (*req)->set_password("benqi@zhazha.nebula.im");
@@ -67,7 +67,8 @@ void TestZProto() {
 //  frame.package_index = c.readBE<int32_t>();
 //  frame.header = c.readBE<uint8_t>();
 //  frame.body_length = c.readBE<int32_t>();
-
+#endif
+  
   
   
 /*

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "nebula/base/testing_util.h"
+#include "nebula/base/testing/testing_util.h"
 
 // void SelfRegisterFactoryManagerTest();
 

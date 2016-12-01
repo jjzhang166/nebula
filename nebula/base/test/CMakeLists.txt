@@ -25,6 +25,6 @@ set (BASE_TEST_LIST
 
 if(APPLE)
 add_executable (base_test ${BASE_TEST_LIST})
-target_link_libraries (base_test nebula)
+target_link_libraries (base_test nebula-net nebula-base)
 endif()
 

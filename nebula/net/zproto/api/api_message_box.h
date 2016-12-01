@@ -18,7 +18,7 @@
 #ifndef	NEBULA_NET_HANDLER_API_API_MESSAGE_BOX_H_
 #define	NEBULA_NET_HANDLER_API_API_MESSAGE_BOX_H_
 
-// #include <google/protobuf/message.h>
+#include <google/protobuf/message.h>
 
 // #include "proto/teamtalk/teamtalk_message_types_util.h"
 // #include "proto/zproto/zproto_message_types_util.h"

@@ -8,8 +8,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "nebula/base/sys_byteorder.h"
-
 namespace nebula {
 
 // Implementation of SHA-1. Only handles data in byte-sized blocks,
@@ -115,7 +113,7 @@ void SecureHashAlgorithm::Final() {
   Process();
 
   for (int t = 0; t < 5; ++t)
-    H[t] = ByteSwap(H[t]);
+    H[t] = __builtin_bswap32(H[t]);
 }
 
 void SecureHashAlgorithm::Update(const void* data, size_t nbytes) {
@@ -162,7 +160,7 @@ void SecureHashAlgorithm::Process() {
   // W and M are in a union, so no need to memcpy.
   // memcpy(W, M, sizeof(M));
   for (t = 0; t < 16; ++t)
-    W[t] = ByteSwap(W[t]);
+    W[t] = __builtin_bswap32(W[t]);
 
   // b.
   for (t = 16; t < 80; ++t)

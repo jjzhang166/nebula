@@ -19,7 +19,7 @@
 #include "nebula/base/timer_manager.h"
 // #include "nebula/net/zproto/zproto_event_callback.h"
 
-#include "nebula/net/zproto/api/api_message_boxed.h"
+// #include "nebula/net/zproto/api/api_message_box.h"
 
 #include "nebula/net/handler/nebula_handler_util.h"
 
@@ -35,6 +35,7 @@ protected:
     BaseServer::Initialize();
     
     timer_manager_->ScheduleRepeatingTimeout([]() {
+#if 0
       // static int i = 0;
       // LOG(INFO) << "ScheduleRepeatingTimeout - " << i++;
       
@@ -53,6 +54,7 @@ protected:
       token_req.SerializeToIOBuf(o);
 
       WriterUtil::Write("net_engine_client_test", std::move(o));
+#endif
     }, 5000);
 
     return true;

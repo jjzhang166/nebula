@@ -18,7 +18,7 @@
 #include <iostream>
 #include <folly/Format.h>
 
-#include "nebula/base/testing_util.h"
+#include "nebula/base/testing/testing_util.h"
 #include "nebula/storage/conn_pool_manager.h"
 #include "nebula/storage/storage_util.h"
 

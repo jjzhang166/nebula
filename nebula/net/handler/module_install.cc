@@ -35,7 +35,7 @@ void InstallModule() {
   ModuleZRpcInitialize();
   
   // teamtalk
-  extern void ModuleTeamtalkInitialize();
-  ModuleTeamtalkInitialize();
+  // extern void ModuleTeamtalkInitialize();
+  // ModuleTeamtalkInitialize();
 }
 
