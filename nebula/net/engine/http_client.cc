@@ -93,7 +93,7 @@ cb_(cb) {
 }
 
 HttpClient::~HttpClient() {
-    // LOG(INFO) << "HttpClient::~HttpClient()";
+    LOG(INFO) << "HttpClient::~HttpClient()";
 }
 
 void HttpClient::Fetch(proxygen::HTTPMethod method,
@@ -141,14 +141,12 @@ void HttpClient::Fetch(proxygen::HTTPMethod method,
               headers2.add(nv[0], value);
           }
       }
-
   }
-  
   
   // copyBuffer();
   std::unique_ptr<folly::IOBuf> post_data2;
   if (method == proxygen::HTTPMethod::POST && !post_data.empty()) {
-      post_data2 = std::move(folly::IOBuf::copyBuffer(post_data));
+      post_data2 = folly::IOBuf::copyBuffer(post_data);
   }
   
   // folly::IOBuf::

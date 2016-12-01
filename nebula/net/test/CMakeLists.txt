@@ -20,20 +20,26 @@ set (SRC_NET_ENGINE_CLIENT_LIST
   net_engine_client_test.cc
   )
 
-add_executable (net_engine_client_test ${SRC_NET_ENGINE_CLIENT_LIST})
-target_link_libraries (net_engine_client_test nebula-net nebula-base)
+#add_executable (net_engine_client_test ${SRC_NET_ENGINE_CLIENT_LIST})
+#target_link_libraries (net_engine_client_test nebula-net nebula-base)
 
 set (SRC_NET_ENGINE_SERVER_LIST
   net_engine_server_test.cc
   )
 
-add_executable (net_engine_server_test ${SRC_NET_ENGINE_SERVER_LIST})
-target_link_libraries (net_engine_server_test nebula-net nebula-base)
+#add_executable (net_engine_server_test ${SRC_NET_ENGINE_SERVER_LIST})
+#target_link_libraries (net_engine_server_test nebula-net nebula-base)
 
 set (SRC_LIST2
   thread_util_test.cc
 )
 
-add_executable (thread_util_test ${SRC_LIST2})
-target_link_libraries (thread_util_test nebula-net nebula-base)
+#add_executable (thread_util_test ${SRC_LIST2})
+#target_link_libraries (thread_util_test nebula-net nebula-base)
 
+set (SRC_HTTP_CLIENT_TEST_LIST
+  http_client_test.cc
+  )
+
+add_executable (http_client_test ${SRC_HTTP_CLIENT_TEST_LIST})
+target_link_libraries (http_client_test nebula-net nebula-base)

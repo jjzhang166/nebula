@@ -108,5 +108,5 @@ add_library(nebula-net STATIC ${SRC_LIST})
 target_link_libraries(nebula-net)
 
 #add_subdirectory(handler/zproto/test)
-#add_subdirectory(test)
+add_subdirectory(test)
 #add_subdirectory(zproto/api/cc)
