@@ -101,4 +101,4 @@ set (SRC_LIST
 add_library(nebula-base STATIC ${SRC_LIST})
 target_link_libraries(nebula-base proxygenhttpserver proxygenlib wangle folly boost_context-mt   boost_filesystem-mt boost_system-mt double-conversion glog gflags event ssl crypto pthread z inotify)
 
-add_subdirectory(test)
+#add_subdirectory(test)

@@ -87,6 +87,8 @@ set (SRC_LIST
   zproto/zproto_frame_data.h
   zproto/zproto_package_data.cc
   zproto/zproto_package_data.h
+#  zproto/api/api_message_box.h
+#  zproto/api/base_message_types_util.h
 
   rpc/zrpc_client_handler.cc
   rpc/zrpc_client_handler.h
@@ -101,15 +103,11 @@ set (SRC_LIST
   rpc/zrpc_module.cc
   rpc/zrpc_service_util.cc
   rpc/zrpc_service_util.h
-
-  zproto/api/api_message_box.cc
-  zproto/api/api_message_box.h
-  zproto/api/proto/auth.proto
 )
 
 add_library(nebula-net STATIC ${SRC_LIST})
 target_link_libraries(nebula-net)
 
-add_subdirectory(handler/zproto/test)
-add_subdirectory(test)
+#add_subdirectory(handler/zproto/test)
+#add_subdirectory(test)
 #add_subdirectory(zproto/api/cc)
