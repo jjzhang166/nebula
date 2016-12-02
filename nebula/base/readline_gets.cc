@@ -33,17 +33,6 @@
 // http://web.mit.edu/gnu/doc/html/rlman_2.html
 /* Read a string, and return a pointer to it.  Returns NULL on EOF. */
 std::string ReadlineGets (const char* prompt) {
-  fd_set fds;
-  struct timeval tv;
-  
-  tv.tv_sec = 1;
-  tv.tv_usec = 0;
-  FD_ZERO( &fds );
-  FD_SET( STDIN_FILENO, &fds );
-  if( select( 1, &fds, NULL, NULL, &tv ) <= 0 ) {
-    return "";
-  }
-  
   std::string line;
 
   /* Get a line from the user. */
