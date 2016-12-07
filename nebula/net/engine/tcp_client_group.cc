@@ -37,7 +37,7 @@ uint64_t TcpClientGroupBase::OnNewConnection(wangle::PipelineBase* pipeline) {
 }
 
 // EventBase线程里执行
-bool TcpClientGroupBase::OnConnectionClosed(uint64_t conn_id) override {
+bool TcpClientGroupBase::OnConnectionClosed(uint64_t conn_id) {
   {
   std::lock_guard<std::mutex> g(online_mutex_);
   for (auto it=online_clients_.begin(); it!=online_clients_.end(); ++it) {

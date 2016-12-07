@@ -26,7 +26,6 @@
 #include "nebula/net/engine/tcp_client.h"
 #include "nebula/net/engine/tcp_server.h"
 
-#include "nebula/net/handler/zproto/zproto_event_callback.h"
 #include "nebula/net/handler/zproto/zproto_pipeline_factory.h"
 
 using namespace nebula;

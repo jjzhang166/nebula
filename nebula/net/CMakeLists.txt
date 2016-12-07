@@ -61,8 +61,6 @@ set (SRC_LIST
   http/http_server_lib_acceptor.h
 
   handler/nebula_event_callback.h
-  handler/zproto/zproto_event_callback.cc
-  handler/zproto/zproto_event_callback.h
   handler/zproto/zproto_handler.cc
   handler/zproto/zproto_handler.h
   handler/zproto/zproto_pipeline_factory.cc
