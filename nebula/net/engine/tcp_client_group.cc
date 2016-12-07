@@ -23,137 +23,69 @@
 #include <folly/SocketAddress.h>
 
 namespace nebula {
-  
 
-// TcpClient由TcpClientGroup创建
-// 需要TcpClientGroupFactory
-//class TcpClientGroupFactory : public ServiceBaseFactory {
-//public:
-//  TcpClientGroupFactory(const std::string& name, const IOThreadPoolExecutorPtr& io_group)
-//      : ServiceBaseFactory(name),
-//        io_group_(io_group) {}
-//
-//
-//  virtual ~TcpClientGroupFactory() = default;
-//
-//  static std::shared_ptr<TcpClientGroupFactory> GetDefaultFactory(const IOThreadPoolExecutorPtr& io_group);
-//  static std::shared_ptr<TcpClientGroupFactory> CreateFactory(const std::string& name,
-//                                                              const IOThreadPoolExecutorPtr& io_group);
-//
-//  const std::string& GetType() const override;
-//  std::shared_ptr<ServiceBase> CreateInstance(const ServiceConfig& config) const override;
-//
-//protected:
-//  IOThreadPoolExecutorPtr io_group_;
-//};
-
-
-//ServiceBaseFactoryPtr CreateTcpGroupFactory(const std::string& name,
-//                                            const std::string& type,
-//                                            const IOThreadPoolExecutorPtr& io_group) {
-//  
-//}
-
-////////////////////////////////////////////////////////////////////////////////
-//void TcpClientGroup::RegisterTcpClient(std::shared_ptr<TcpServiceBase> client) {
-//  // TODO(@benqi)
-//  //   检查是否是TcpClient
-//  //   检查类型名和服务名是否一样
-//  std::lock_guard<std::mutex> g(mutex_);
-//  clients_.push_back(std::static_pointer_cast<TcpClient>(client));
-//}
-//
-//// TODO(@benqi)
-////  存在线程安全的问题
-////  如何保证？？？
-//// 考虑如下解决方案：
-////  当创建分组时，保证这个分组里的所有连接都落在一个线程里
-////  投递数据给分组时，先将网络包发送到分组所属的线程
-////  然后在这个线程里按策略分发数据
-//// 简单实现
-////  为一组主动发起的连接创建全分配到一个线程里
-////  所有主动发起的连接共用这个线程
-//bool TcpClientGroup::SendIOBuf(std::unique_ptr<folly::IOBuf> data, DispatchStrategy dispatch_strategy) {
-//  auto onlines = GetOnlineClients();
-//  if (onlines.empty()) {
-//    LOG(ERROR) << "SendIOBuf - Not active tcp_client: ";
-//    return false;
-//  }
-//  switch (dispatch_strategy) {
-//    case DispatchStrategy::kBroadCast:
-//      // 广播: 每个都发，保险起见，直接使用
-//      for (auto & c : onlines) {
-//        if (c->connected()) {
-//          c->SendIOBufThreadSafe(std::move(data->clone()));
-//        }
-//      }
-//      break;
-//    case DispatchStrategy::kDefault:
-//    case DispatchStrategy::kRandom:
-//    case DispatchStrategy::kRoundRobin:
-//    case DispatchStrategy::kConsistencyHash:
-//    default: {
-//        // TODO(@benqi)
-//        //  后续补上其他的分发策略
-//        //  当前只支持随机策略
-//        folly::ThreadLocalPRNG rng;
-//        uint32_t idx = folly::Random::rand32(static_cast<uint32_t>(onlines.size()));
-//        onlines[idx]->SendIOBufThreadSafe(std::move(data));
-//        
-//        LOG(INFO) << "SendIOBuf - dispatch_strategy, dispatch idx: " << idx;
-//      }
-//      break;
-//  }
-//  
-//  return true;
-//}
-//
-//bool TcpClientGroup::SendIOBuf(std::unique_ptr<folly::IOBuf> data,
-//               const std::function<void()>& c) {
-//    auto onlines = GetOnlineClients();
-//    if (onlines.empty()) {
-//        LOG(ERROR) << "SendIOBuf - Not active tcp_client: ";
-//        return false;
-//    }
-//
-//    folly::ThreadLocalPRNG rng;
-//    uint32_t idx = folly::Random::rand32(static_cast<uint32_t>(onlines.size()));
-//    onlines[idx]->SendIOBufThreadSafe(std::move(data), c);
-//    // LOG(INFO) << "SendIOBuf - dispatch_strategy, dispatch idx: " << idx;
-//    return true;
-//
-//}
-//
-//bool TcpClientGroup::Stop() {
-//    LOG(INFO) << "TcpClientGroup - Stop service: " << GetServiceConfig().ToString();
-//    
-//    std::lock_guard<std::mutex> g(mutex_);
-//    for (auto& c : clients_) {
-//        c->Stop();
-//    }
-//
-//    return true;
-//}
-//
-////////////////////////////////////////////////////////////////////////////////
-//std::shared_ptr<TcpClientGroupFactory> TcpClientGroupFactory::GetDefaultFactory(const IOThreadPoolExecutorPtr& io_group) {
-//    static auto g_default_factory = std::make_shared<TcpClientGroupFactory>("tcp_client", io_group);
-//    
-//    return g_default_factory;
-//}
-//
-//std::shared_ptr<TcpClientGroupFactory> TcpClientGroupFactory::CreateFactory(const std::string& name,
-//                                                                            const IOThreadPoolExecutorPtr& io_group) {
-//    return std::make_shared<TcpClientGroupFactory>(name, io_group);
-//}
-//
-//const std::string& TcpClientGroupFactory::GetType() const {
-//    static std::string g_tcp_client_service_name("tcp_client");
-//    return g_tcp_client_service_name;
-//}
-//
-//std::shared_ptr<ServiceBase> TcpClientGroupFactory::CreateInstance(const ServiceConfig& config) const {
-//    return std::make_shared<TcpClientGroup>(config, io_group_);
-//}
-
+// Impl from TcpConnEventCallback
+// 内网经常断线的可能性不大，故让tcp_client_group维护一个已经连接列表
+uint64_t TcpClientGroupBase::OnNewConnection(wangle::PipelineBase* pipeline) {
+  auto conn_id = TcpServiceBase::OnNewConnection(pipeline); {
+    std::weak_ptr<wangle::PipelineBase> cli(pipeline->shared_from_this());
+    // TODO(@benqi): 读多写少，用读写锁
+    std::lock_guard<std::mutex> g(online_mutex_);
+    online_clients_.push_back(std::make_pair(conn_id, cli));
+  }
+  return conn_id;
 }
+
+// EventBase线程里执行
+bool TcpClientGroupBase::OnConnectionClosed(uint64_t conn_id) override {
+  {
+  std::lock_guard<std::mutex> g(online_mutex_);
+  for (auto it=online_clients_.begin(); it!=online_clients_.end(); ++it) {
+    if (it->first == conn_id) {
+      online_clients_.erase(it);
+      break;
+    }
+  }
+  }
+  
+  return TcpServiceBase::OnConnectionClosed(conn_id);
+}
+
+// 获取client
+bool TcpClientGroupBase::GetOnlineClientByRandom(OnlineTcpClient* client) const {
+  bool rv = true;
+  
+  folly::ThreadLocalPRNG rng; {
+    std::lock_guard<std::mutex> g(online_mutex_);
+    if (!online_clients_.empty()) {
+      uint32_t idx = folly::Random::rand32(static_cast<uint32_t>(online_clients_.size()));
+      *client = online_clients_[idx];
+    } else {
+      rv = false;
+    }
+  }
+  
+  return rv;
+}
+
+// TODO(@benqi): 暂时未实现
+bool TcpClientGroupBase::GetOnlineClientByConsistencyHash(OnlineTcpClient* client) const {
+  bool rv = false;
+  return rv;
+}
+
+bool TcpClientGroupBase::GetOnlineClients(OnlineTcpClientList* clients) const {
+  bool rv = true; {
+    std::lock_guard<std::mutex> g(online_mutex_);
+    
+    if (!online_clients_.empty()) {
+      *clients = online_clients_;
+    } else {
+      rv = false;
+    }
+  }
+  return rv;
+}
+  
+}
+

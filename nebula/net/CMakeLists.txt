@@ -37,6 +37,7 @@ set (SRC_LIST
   engine/tcp_service_base.cc
   engine/tcp_service_base.h
   engine/tcp_server.h
+  engine/tcp_client_group.cc
   engine/tcp_client_group.h
   engine/tcp_client_pool.h
   engine/tcp_client.h
