@@ -23,6 +23,8 @@
 #ifndef NEBULA_BASE_REFLECTION_UTIL_H_
 #define NEBULA_BASE_REFLECTION_UTIL_H_
 
+#include <memory>
+#include <string>
 #include <array>
 #include <tuple>
 
