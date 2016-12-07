@@ -32,7 +32,6 @@ set (SRC_LIST
   base/service_config.cc
   base/service_config.h
 
-  engine/cluster_manager.cc
   engine/cluster_manager.h
   engine/tcp_service_base.cc
   engine/tcp_service_base.h
@@ -74,7 +73,6 @@ set (SRC_LIST
   handler/module_install.h
   handler/nebula_base_handler.cc
   handler/nebula_base_handler.h
-  handler/nebula_handler_util.cc
   handler/nebula_handler_util.h
   handler/echo/echo_handler.cc
   handler/echo/echo_handler.h

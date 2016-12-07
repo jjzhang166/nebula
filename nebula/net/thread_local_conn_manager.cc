@@ -51,20 +51,6 @@ bool ThreadLocalConnManager::OnConnectionClosed(uint64_t conn_id) {
     return rv;
 }
 
-//bool ThreadLocalConnManager::SendIOBufByConnID(uint64_t conn_id, std::unique_ptr<folly::IOBuf> data) {
-//    LOG(INFO) << "DispatchIOBufByConnID - Ready find pipeline: by conn_id: " << conn_id
-//                << ", thread_id: " << thread_id_;
-//    
-//    auto it = pipelines_.find(conn_id & 0xffffffff);
-//    if (it!=pipelines_.end()) {
-//        it->second->write(std::move(data));
-//    } else {
-//        LOG(ERROR) << "DispatchIOBufByConnID - Not find conn_id: " << conn_id
-//                    << ", thread_id: " << thread_id_;
-//    }
-//    return true;
-//}
-
 ThreadLocalConnManager& GetConnManagerByThreadLocal() {
     static folly::SingletonThreadLocal<ThreadLocalConnManager> g_cache([]() {
         return new ThreadLocalConnManager();

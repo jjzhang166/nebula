@@ -33,14 +33,6 @@ struct PackageHeader {
 };
 
 struct AttachDataMessage  {
-  //  enum {
-  //    HEADER = Package::ATTACH_DATA_MESSAGE,
-  //  };
-  //
-  //  uint8_t GetPackageType() const {
-  //    return HEADER;
-  //  }
-  
   uint8_t     proto_revision {0};
   uint64_t    birth_timetick {0};         // 服务端收到一条消息后设置服务端当前时间戳，用来计算每个链路的调用耗时
   uint64_t    birth_track_uuid {0};
@@ -49,10 +41,6 @@ struct AttachDataMessage  {
   uint64_t    birth_conn_id {0};
   std::string birth_remote_ip;
   
-  // uint8_t api_major_version;
-  // uint8_t api_minor_version;
-  // uint8_t client_type;
-  // std::map<std::string, std::string> options;
   struct OptionData {
     ~OptionData() {
       if (type == 1) {
@@ -87,42 +75,10 @@ struct AttachDataMessage  {
     for (auto& v : options) {
       sz += v.CalcOptionDataSize();
     }
-    
-//    for (auto it=options.begin(); it!=options.end(); ++it) {
-//      sz += SIZEOF_STRING(it->first) + SIZEOF_STRING(it->second);
-//    }
     return sz;
   }
 
   std::string ToString() const;
-  
-  // PackageMessagePtr child_package_message;
-  // uint8_t chind_package_type;
-  
-  // 附带消息
-  // virtual uint8_t GetChildPackageType() const = 0;
-  
-  // repeated string preferred_languages;
-  
-  
-  // uint32 node_id = 1;
-  // uint64 conn_id = 2;
-  // uint32 app_id  = 3;
-  // uint64 user_id = 4;
-  // string from    = 5;
-  // uint16_t client_type;           // 客户端类型
-  // uint16_t client_version;        // 客户端版本号
-  // uint32_t app_id;                // 通过登录时附带的app_token字段找到对应的app_id
-  // uint16_t lang_type = 0;             //（国际化类型）语言类型
-  // uint16_t srv_number = 0;            // 接入服务器的编号，仅服务端用，客户端设置为0
-  // uint16_t srv_reserved = 0;          // 预留字段
-  // uint64_t cli_handle = 0;            // 标识客户端连到接入服务器上的网络句柄，仅服务端用，客户端设置为0
-  // uint32_t user_id = 0;               // 请求者的用户id，仅服务端用，客户端为0
-  // uint64_t recv_timetick = 0;         // 服务端收到一条消息后设置服务端当前时间戳，用来计算每个链路的调用耗时
-  // uint64_t fiber_id = 0;              // 协程ID
-  // char pdu_uuid[32] = {0};            // 为每个请求生成一个全局唯一id，做为全局调用链的跟踪ID
-  // char from[16] = {0};                // 从哪里来（接收到的远端IP或服务）
-  // char to[16] = {0};                  // 到哪里去（发送到远端IP或服务）
 };
 
 // Transport Level
@@ -506,19 +462,6 @@ struct RequestDH : public PackageMessage {
   // Client's key used for encryption
   std::string client_key;
 };
-
- /*
- Calculations
- 
- pre_master_secret := <result_of_dh>
- master_secret := PRF_COMBINED(pre_master_secret, "master secret", clientNonce + ServerNonce, 128)
- verify := PRF_COMBINED(master_secret, "client finished", clientNonce + ServerNonce, 256)
- verify_sign := Ed25519(verification, server_private_signing_key)
- 
- where PRF_COMBINED:
- PRF(COMBINE(SHA256, STREEBOG256)), where:
- COMBINE(str, HASH1, HASH2) = HASH1(str + HASH2(str))
- */
 
 // master_secret is result encryption key.
 // First 128 bytes is US encryption keys and last 128 bytes is Russian encryption keys.
@@ -1277,23 +1220,6 @@ struct Container : public PackageMessage {
   // Messages in container
   std::list<PackageMessagePtr> data;
 };
-
-/*
-struct AttachDataMessage : public PackageMessage {
-  enum {
-    HEADER = Package::ATTACH_DATA_MESSAGE,
-  };
-  
-  uint8_t GetPackageType() const override {
-    return HEADER;
-  }
-  
-  bool Decode(Package& package) override {
-    PackageMessage::Decode(package);
-    return true;
-  }
-};
-*/
 
 using PackageFactory = nebula::SelfRegisterFactoryManager<PackageMessage, uint8_t>;
 

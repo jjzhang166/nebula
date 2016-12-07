@@ -30,11 +30,7 @@ public:
   virtual void OnClientConnectionError(SimpleTcpClient* tcp_client) {}
 };
 
-
 // 使用场景：测试客户端，代理等有生命周期、需要管理的Client连接
-// TODO(@benqi)
-//  如果连接断开以后，如何保证数据可靠
-//  先不管
 class SimpleTcpClient : public wangle::PipelineManager {
 public:
   explicit SimpleTcpClient(folly::EventBase* base,

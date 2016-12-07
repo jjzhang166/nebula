@@ -38,18 +38,6 @@ std::shared_ptr<NetEngineManager> NetEngineManager::GetInstance() {
 
 void NetEngineManager::set_thread_groups(const std::shared_ptr<ThreadGroupListManager>& thread_groups) {
   thread_groups_ = thread_groups;
-  
-  // 注册默认服务名"tcp_server"
-//  auto acc = thread_groups_->GetIOThreadPoolExecutor(ThreadType::CONN_ACCEPT);
-//  if (acc) {
-//    ServiceFactoryManager::GetInstance()->RegisterServiceFactory(TcpServerFactory::GetDefaultFactory(acc));
-//  }
-//  
-//  // 注册默认服务名"tcp_client"
-//  auto conn = thread_groups_->GetIOThreadPoolExecutor(ThreadType::CONN_CLIENT);
-//  if (conn) {
-//    ServiceFactoryManager::GetInstance()->RegisterServiceFactory(TcpClientFactory::GetDefaultFactory(conn));
-//  }
 }
 
 

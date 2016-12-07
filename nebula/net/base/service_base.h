@@ -120,42 +120,14 @@ protected:
 
 using ServiceBasePtr = std::shared_ptr<ServiceBase>;
 
-/*
-//////////////////////////////////////////////////////////////////////////////
-class ServiceBaseFactory : public FactoryObject<ServiceBase> {
-public:
-  explicit ServiceBaseFactory(const std::string& name)
-    : name_(name) {}
+using NewServiceBaseFunc = std::function<
+  ServiceBasePtr(const ServiceConfig&, const std::shared_ptr<wangle::IOThreadPoolExecutor>&)
+>;
   
-  virtual ~ServiceBaseFactory() = default;
-  
-  // 服务名: 由配置进行设置，比如zhazhad
-  virtual const std::string& GetName() const {
-    return name_;
-  }
+using ServiceSelfRegisterFactoryManager = FuncFactoryManager<
+  NewServiceBaseFunc, std::pair<std::string, std::string>
+>;
 
-  // 协议: 由配置进行设置，比如zproto、echo等
-  virtual const std::string& GetProto() const {
-    return proto_;
-  }
-
-  virtual ServiceBasePtr CreateInstance(const ServiceConfig& config) const = 0;
-  
-protected:
-  ServiceBasePtr CreateInstance() const override {
-    return nullptr;
-  }
-  
-  std::string name_;
-  std::string proto_;
-};
-
-using ServiceBaseFactoryPtr = std::shared_ptr<ServiceBaseFactory>;
-*/
-  
-using NewServiceBaseFunc = std::function<ServiceBasePtr(const ServiceConfig&, const std::shared_ptr<wangle::IOThreadPoolExecutor>&)>;
-  
-using ServiceSelfRegisterFactoryManager = FuncFactoryManager<NewServiceBaseFunc, std::pair<std::string, std::string>>;
 using ServiceSelfRegisterTemplate = ServiceSelfRegisterFactoryManager::RegisterTemplate;
 
 

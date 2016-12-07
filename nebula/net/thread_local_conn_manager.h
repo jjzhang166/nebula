@@ -33,12 +33,12 @@ namespace nebula {
 // 基于ThreadLocal的连接管理器（从IOThreadConnManager改进）
 // @benqi, 改进思路
 // 以前的实现里有两个地方不是最优解：
-//   1. service_pipelines_, 仅仅用于在gateway里，一旦status_server和gateway建立连接后,
-//      gateway上报所有客户端的在线状态
+//   1. service_pipelines_, 仅仅用于在gate里，一旦status_server和gateway建立连接后,
+//      gate上报所有客户端的在线状态
 //   2. server_conns_, 仅仅用于msg_server指定server_number发送
 // 这两个功能是和具体的业务耦合在一起的:
 //   对biz_server，1不使用
-//   对gateway_server，2不使用
+//   对gate_server，2不使用
 // 从ConnManager类的职责来说，不应该在此实现这两个功能
 // 即使要实现1的功能，也不需要专门维护一个service_pipelines_来实现
 class ThreadLocalConnManager : public TcpConnEventCallback {
