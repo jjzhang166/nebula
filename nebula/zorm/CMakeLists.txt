@@ -23,5 +23,5 @@ zorm_template.h
 
 
 add_executable (zorm ${SRC_LIST})
-target_link_libraries (zorm nebula-storage nebula-base)
+target_link_libraries (zorm storage base)
 

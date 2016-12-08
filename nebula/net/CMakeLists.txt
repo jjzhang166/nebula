@@ -101,9 +101,9 @@ set (SRC_LIST
   rpc/zrpc_service_util.h
 )
 
-add_library(nebula-net STATIC ${SRC_LIST})
-target_link_libraries(nebula-net)
+add_library(net STATIC ${SRC_LIST})
+target_link_libraries(net)
 
-#add_subdirectory(handler/zproto/test)
-add_subdirectory(test)
+add_subdirectory(handler/zproto/test)
+#add_subdirectory(test)
 #add_subdirectory(zproto/api/cc)

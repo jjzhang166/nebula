@@ -34,8 +34,8 @@ set (SRC_LIST
 )
 
 
-add_library (nebula-storage ${SRC_LIST})
-target_link_libraries (nebula-storage /usr/local/mysql/lib/libmysqlclient.a)
+add_library (storage ${SRC_LIST})
+target_link_libraries (storage /usr/local/mysql/lib/libmysqlclient.a)
 
 add_subdirectory(test)
 

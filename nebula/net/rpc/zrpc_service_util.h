@@ -27,9 +27,12 @@ struct ZRpcUtil {
   using  ServiceFunc = std::function<ProtoRpcResponsePtr(RpcRequestPtr)>;
 
   static folly::Future<ProtoRpcResponsePtr> DoClientCall(const std::string& service_name, RpcRequestPtr request);
+  
   static void Register(int method_id, ServiceFunc f);
   
-  // static ProtoRpcResponsePtr MakeInternal
+  // Request名字的crc32值作为method_id
+  static void Register(const std::string& message_name, ServiceFunc f);
+  
 protected:
   friend class ZRpcService;
   static ProtoRpcResponsePtr DoServiceCall(RpcRequestPtr request);

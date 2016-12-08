@@ -71,15 +71,6 @@ public:
     return group_event_callback_->OnConnectionClosed(conn_id);
   }
 
-  // void set_tcp_client_group(TcpClientGroup* tcp_client_group) {
-  //   tcp_client_group_ = tcp_client_group;
-  // }
-  
-  // Pipeline* GetPipeline() {
-  //  DCHECK(client_);
-  //  return client_ ? client_->getPipeline() : nullptr;
-  // }
-  
   folly::EventBase* GetEventBase() {
     // CHECK(client_);
     return client_ ? client_->getEventBase() : nullptr;
@@ -99,7 +90,6 @@ public:
     //  检查factory_,conns_,config_等
     CHECK(client_);
 
-    // client_.group(conns_->GetIOThreadPoolExecutor());
     client_->pipelineFactory(factory_);
     auto main_eb = client_->getEventBase();
     main_eb->runImmediatelyOrRunInEventBaseThreadAndWait([this]() {
@@ -132,7 +122,6 @@ public:
     return true;
   }
   
-  
   // PipelineManager implementation
   void deletePipeline(wangle::PipelineBase* pipeline) override {
     connected_.store(false);
@@ -153,38 +142,6 @@ public:
     // TODO(@benqi):
     CHECK(client_);
   }
-  
-#if 0
-  //  bool SendIOBufThreadSafe(std::unique_ptr<folly::IOBuf> data) {
-  //    auto main_eb = client_->getEventBase();
-  //    auto o = folly::makeMoveWrapper(std::move(data));
-  //    //std::shared_ptr<folly::IOBuf> o(std::move(data));
-  //    main_eb->runInEventBaseThread([this, o]() mutable {
-  //      if (connected()) {
-  //        auto d2 = o.move();
-  //        client_->getPipeline()->write(o.move());
-  //      }
-  //    });
-  //    return true;
-  //  }
-  
-  // TODO(@wubenqi): 必须是std::shared_ptr<>/std::shared_ptr等
-  template <typename Msg>
-  bool SendIOBufThreadSafe(Msg msg, const std::function<void()>& c) {
-    auto main_eb = client_->getEventBase();
-    
-    std::function<void()> c2 = c;
-    auto o = folly::makeMoveWrapper(std::move(msg));
-    
-    main_eb->runInEventBaseThread([this, o, c2]() mutable {
-      if (connected()) {
-        client_->getPipeline()->write(o.move());
-        c2();
-      }
-    });
-    return true;
-  }
-#endif
   
   bool connected() {
     return connected_.load();
@@ -230,17 +187,12 @@ protected:
     });
   }
   
-  // std::shared_ptr<IOThreadPoolConnManager> conns_;
-  // 指定该连接所属EventBase线程
-  // folly::EventBase* base_ = nullptr;
-  // IOThreadConnManager* conn_{nullptr};
   std::shared_ptr<wangle::PipelineFactory<Pipeline>> factory_;
   std::shared_ptr<wangle::ClientBootstrap2<Pipeline>> client_;
   std::atomic<bool> connected_ {false};
   bool stoped_ {false};
   
   // 所属分组
-  // TcpClientGroup* tcp_client_group_ {nullptr};
   folly::SocketAddress conn_address_;
   
   TcpConnEventCallback* group_event_callback_ {nullptr};

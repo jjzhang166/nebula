@@ -21,5 +21,5 @@ set (TEST_LIST
  )
 
 add_executable (scriptegine_test ${TEST_LIST})
-target_link_libraries (scriptegine_test script_engine nebula-base)
+target_link_libraries (scriptegine_test script_engine base)
 

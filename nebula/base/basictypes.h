@@ -35,9 +35,11 @@ void operator=(const TypeName&) = delete
 
 // A macro to disallow the copy constructor and operator= functions.
 // This should be used in the private: declarations for a class.
+#ifndef DISALLOW_COPY_AND_ASSIGN
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
 TypeName(const TypeName&) = delete;      \
 void operator=(const TypeName&) = delete
+#endif
 
 // A macro to disallow all the implicit constructors, namely the
 // default constructor, copy constructor and operator= functions.
@@ -45,9 +47,11 @@ void operator=(const TypeName&) = delete
 // This should be used in the private: declarations for a class
 // that wants to prevent anyone from instantiating it. This is
 // especially useful for classes containing only static methods.
+#ifndef DISALLOW_IMPLICIT_CONSTRUCTORS
 #define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
 TypeName() = delete;                           \
 DISALLOW_COPY_AND_ASSIGN(TypeName)
+#endif
 
 // The arraysize(arr) macro returns the # of elements in an array arr.  The
 // expression is a compile-time constant, and therefore can be used in defining

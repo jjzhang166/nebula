@@ -49,7 +49,7 @@
 
 // Subset of http://msdn.microsoft.com/en-us/library/system.text.stringbuilder.aspx
 template <typename chr>
-class StringBuilder {
+class BasicStringBuilder {
 	typedef std::basic_string<chr> string_t;
 	// After testing several times with deque, vector and list, deque performed _slightly_ better.
  	typedef std::deque<string_t> container_t;
@@ -61,11 +61,11 @@ class StringBuilder {
 		m_totalSize += src.size();
 	}
 	// No copy constructor, no assignment.
-	StringBuilder(const StringBuilder &);
-	StringBuilder & operator = (const StringBuilder &);
+	BasicStringBuilder(const BasicStringBuilder &);
+	BasicStringBuilder & operator = (const BasicStringBuilder &);
   
 public:
-	StringBuilder(const string_t &src) {
+	BasicStringBuilder(const string_t &src) {
 		if (src.empty()) {
 			m_totalSize = 0;
 		} else {
@@ -74,17 +74,17 @@ public:
 		}
 	}
   
-	StringBuilder() {
+	BasicStringBuilder() {
 		m_totalSize = 0;
 	}
 
-	StringBuilder & Append(const string_t &src) {
+	BasicStringBuilder & Append(const string_t &src) {
 		append(src);
 		return *this; // allow chaining.
 	}
   
 	template<class iterator>
-	StringBuilder & Add(const iterator &first, const iterator &afterLast) {
+	BasicStringBuilder & Add(const iterator &first, const iterator &afterLast) {
 		// std::for_each and a lambda look like overkill here.
 		for (iterator f = first; f != afterLast; ++f) {
 			append(*f);
@@ -92,21 +92,21 @@ public:
 		return *this;
 	}
   
-	StringBuilder & AppendLine(const string_t &src) {
+	BasicStringBuilder & AppendLine(const string_t &src) {
 		chr lineFeed[] { 10, 0 }; // C++ 11. Feel the love!
 		m_Data.push_back(src + lineFeed);
 		m_totalSize += 1 + src.size();
 		return *this; // allow chaining.
 	}
   
-	StringBuilder & AppendLine() {
+	BasicStringBuilder & AppendLine() {
 		chr lineFeed[] { 10, 0 };
 		m_Data.push_back(lineFeed);
 		++m_totalSize;
 		return *this; // allow chaining.
 	}
   
-	StringBuilder &Clear() {
+	BasicStringBuilder &Clear() {
 		m_totalSize = 0;
 		m_Data.clear();
 		return *this;
@@ -158,7 +158,10 @@ public:
 		return std::accumulate(++iter, m_Data.end(), result, adr);
 	}
 
-}; // class StringBuilder
+}; // class BasicStringBuilder
+
+typedef BasicStringBuilder<char> StringBuilder;
+typedef BasicStringBuilder<wchar_t> WStringBuilder;
 
 #endif
 

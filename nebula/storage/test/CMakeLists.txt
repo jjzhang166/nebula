@@ -22,6 +22,6 @@ set (BASE_TEST_LIST
 
 if(APPLE)
 add_executable (storage_test ${BASE_TEST_LIST})
-target_link_libraries (storage_test nebula-storage nebula-net nebula-base)
+target_link_libraries (storage_test storage net base)
 endif()
 

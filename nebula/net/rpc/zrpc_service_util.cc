@@ -18,6 +18,7 @@
 #include "nebula/net/rpc/zrpc_service_util.h"
 
 #include <folly/MoveWrapper.h>
+#include <folly/Checksum.h>
 
 #include "nebula/base/id_util.h"
 #include "nebula/base/map_util.h"
@@ -66,10 +67,19 @@ folly::Future<ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& ser
 
 void ZRpcUtil::Register(int method_id, ServiceFunc f) {
   if (ContainsKey(g_rpc_services, method_id)) {
-    LOG(ERROR) << "Register - duplicate entry for method_id: " << method_id;
+    // 重新检查
+    LOG(FATAL) << "Register - duplicate entry for method_id: " << method_id;
   } else {
     g_rpc_services.emplace(method_id, f);
   }
+}
+
+void ZRpcUtil::Register(const std::string& message_name, ServiceFunc f) {
+  auto method_id = folly::crc32c((const uint8_t*)message_name.data(), message_name.length());
+  DLOG(INFO) << "message_name: " << message_name
+              << ", method_id: " << method_id;
+  
+  Register(method_id, f);
 }
 
 ProtoRpcResponsePtr ZRpcUtil::DoServiceCall(RpcRequestPtr request) {
