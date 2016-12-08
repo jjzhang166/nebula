@@ -57,8 +57,6 @@ template<std::size_t I = 0, typename Tuple>
 typename std::enable_if<
     I < std::tuple_size<Tuple>::value
   >::type FromQueryAnswer(const Tuple& t, db::QueryAnswer& answ) {
-  
-  // d.update(ToJsonDynamic(std::get<I>(t)));
   auto fld = std::get<I>(t);
   answ.GetColumn(fld.first, &fld.second);
   FromQueryAnswer<I + 1>(t, answ);
