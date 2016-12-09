@@ -20,16 +20,17 @@
 #include "zrpc_test.pb.h"
 #include "nebula/net/rpc/zrpc_service_util.h"
 
-#include "api_message_box.h"
+#include "nebula/net/zproto/api_message_box.h"
 
 ProtoRpcResponsePtr DoZRpcTestReq(RpcRequestPtr request) {
-  auto req = ToApiRpcRequest<zproto::ZRpcTestReq>(request);
-  LOG(INFO) << (*req)->Utf8DebugString();
+  CAST_RPC_REQUEST(ZRpcTestReq, rpc_test_req);
   
-  auto rsp = std::make_shared<ApiRpcOk<zproto::ZRpcTestRsp>>();
-  rsp->set_req_message_id(request->message_id());
-  (*rsp)->set_rsp_data("0123456789876543210");
-  return rsp;
+  LOG(INFO) << rpc_test_req.Utf8DebugString();
+  
+  
+  zproto::ZRpcTestRsp message_rsp;
+  message_rsp.set_rsp_data("0123456789876543210");
+  return ::MakeRpcOK(message_rsp);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

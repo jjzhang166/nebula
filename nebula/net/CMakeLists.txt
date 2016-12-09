@@ -83,8 +83,7 @@ set (SRC_LIST
   zproto/zproto_frame_data.h
   zproto/zproto_package_data.cc
   zproto/zproto_package_data.h
-#  zproto/api/api_message_box.h
-#  zproto/api/base_message_types_util.h
+  zproto/api_message_box.h
 
   rpc/zrpc_client_handler.cc
   rpc/zrpc_client_handler.h

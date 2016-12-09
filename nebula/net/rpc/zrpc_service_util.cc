@@ -85,15 +85,27 @@ void ZRpcUtil::Register(const std::string& message_name, ServiceFunc f) {
 ProtoRpcResponsePtr ZRpcUtil::DoServiceCall(RpcRequestPtr request) {
   CHECK(request);
   
+  ProtoRpcResponsePtr r;
   auto it = g_rpc_services.find(request->method_id);
   if (it != g_rpc_services.end()) {
-    auto r = (it->second)(request);
-    r->set_message_id(GetNextIDBySnowflake());
-    return r;
+    r = (it->second)(request);
+    // r->set_message_id(GetNextIDBySnowflake());
+    // return r;
     //(it->second)(request);
+    r->set_req_message_id(request->message_id());
   } else {
     LOG(ERROR) << "ServiceCall - Not register request: " << request->ToString();
-    return std::make_shared<RpcInternalError>(request->message_id());
+    r = std::make_shared<RpcInternalError>(request->message_id());
   }
+  
+  // TODO(@benqi): 是否要关注应用层的设置？
+  r->set_message_id(GetNextIDBySnowflake());
+  r->set_auth_id(request->auth_id());
+  r->set_session_id(request->session_id());
+  if (request->has_attach_data()) {
+    r->set_has_attach_data();
+    r->attach_data = request->attach_data;
+  }
+  return r;
 }
 

@@ -18,7 +18,7 @@
 #include "nebula/net/base_server.h"
 
 #include "zrpc_test.pb.h"
-#include "api_message_box.h"
+#include "nebula/net/zproto/api_message_box.h"
 
 #include "nebula/base/timer_manager.h"
 #include "nebula/net/rpc/zrpc_service_util.h"

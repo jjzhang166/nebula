@@ -19,9 +19,9 @@ include_directories(/usr/local/include ../..)
 #add_executable (zproto_test zproto_test.cc)
 #target_link_libraries (zproto_test net base)
 
-add_executable (zrpc_client_test zrpc_client_test.cc api_message_box.h zrpc_test.pb.cc zrpc_test.pb.h zrpc_test.proto)
+add_executable (zrpc_client_test zrpc_client_test.cc zrpc_test.pb.cc zrpc_test.pb.h zrpc_test.proto)
 target_link_libraries (zrpc_client_test net base protobuf) 
 
-add_executable (zrpc_server_test zrpc_server_test.cc api_message_box.h zrpc_test.pb.cc zrpc_test.pb.h zrpc_test.proto)
+add_executable (zrpc_server_test zrpc_server_test.cc zrpc_test.pb.cc zrpc_test.pb.h zrpc_test.proto)
 target_link_libraries (zrpc_server_test net base protobuf)
 

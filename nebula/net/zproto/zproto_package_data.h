@@ -602,7 +602,7 @@ struct RpcRequest : public ProtoRpcRequest {
     PackageMessage::Decode(package);
     folly::io::Cursor c(package.message.get());
     // req_message_id = c.readBE<int64_t>();
-    method_id = c.readBE<int32_t>();
+    method_id = c.readBE<uint32_t>();
     nebula::io_buf_util::TrimStart(package.message.get(), sizeof(method_id));
     
     return true;
@@ -623,7 +623,7 @@ struct RpcRequest : public ProtoRpcRequest {
   virtual uint32_t GetMethodID() const = 0;
 
   // ID of API Method Request
-  int32_t method_id; //: int
+  uint32_t method_id; //: int
   // Encoded Request
   // body: bytes
   // mutable std::unique_ptr<folly::IOBuf> body;
@@ -685,7 +685,7 @@ struct RpcOk : public ProtoRpcResponse {
     try {
       folly::io::Cursor c(package.message.get());
       req_message_id = c.readBE<int64_t>();
-      method_response_id = c.readBE<int32_t>();
+      method_response_id = c.readBE<uint32_t>();
       
       // TODO(@benqi): 使用c已读长度
       nebula::io_buf_util::TrimStart(package.message.get(), sizeof(req_message_id) + sizeof(method_response_id));
@@ -712,7 +712,7 @@ struct RpcOk : public ProtoRpcResponse {
   virtual uint32_t GetMethodResponseID() const = 0;
 
   // ID of API Method Response
-  int32_t method_response_id; // : int
+  uint32_t method_response_id; // : int
   // Encoded response
   // body: bytes
   // mutable std::unique_ptr<folly::IOBuf> body;
@@ -983,6 +983,8 @@ struct Push : public ProtoPush {
   // Encoded Push body
   // mutable std::unique_ptr<folly::IOBuf> body;
 };
+
+using PushPtr = std::shared_ptr<Push>;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 struct EncodedPush : public Push, public ProtoBox<EncodedMessage> {
