@@ -114,3 +114,76 @@ int SqlExecute(const std::string& db_name, const BaseSqlQuery& query) {
   db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
   return db_conn->Execute(query_string);
 }
+
+
+int DoStorageQuery(const std::string& db_name, MakeQueryStringFunc make_q, MakeQueryResultFunc make_r) {
+  int rv = 0;
+  
+  std::string query_string;
+  make_q(query_string);
+  if (query_string.empty()) {
+    LOG(ERROR) << "DoStorageQuery - make_q error, query_string is empty!!!";
+    return -2;
+  }
+
+  // TODO(@benqi): 这里可能会出错返回
+  auto db_conn_pool = GetDBConnPool(db_name);
+  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
+  // -1
+  
+  std::unique_ptr<db::QueryAnswer> answ(db_conn->Query(query_string));
+  if (answ.get() != NULL) {
+    // bool is_empty;
+    rv = static_cast<int>(answ->GetRowCount());
+    // LOG(INFO) << "rv = " << rv;
+    if(rv > 0) {
+      while (answ->FetchRow()) {
+        auto r = make_r(*answ);
+        if (r == QResultCode::BREAK) {
+          // 只处理一个
+          rv = 1;
+          break;
+        } else if (r == QResultCode::ERROR) {
+          rv = -3;
+          break;
+        } else if (r == QResultCode::CONTINUE) {
+          // 继续
+        }
+      }
+    }
+  } else {
+    rv = -2;
+  }
+  
+  return rv;
+}
+
+int64_t DoStorageInsertID(const std::string& db_name, MakeQueryStringFunc make_q) {
+  std::string query_string;
+  make_q(query_string);
+  if (query_string.empty()) {
+    LOG(ERROR) << "DoStorageInsertID - make_q error, query_string is empty!!!";
+    return -2;
+  }
+  
+  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  auto db_conn_pool = GetDBConnPool(db_name);
+  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
+  return db_conn->ExecuteInsertID(query_string);
+}
+
+int DoStorageExecute(const std::string& db_name, MakeQueryStringFunc make_q) {
+  std::string query_string;
+  make_q(query_string);
+  if (query_string.empty()) {
+    LOG(ERROR) << "DoStorageInsertID - make_q error, query_string is empty!!!";
+    return -2;
+  }
+  
+  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  auto db_conn_pool = GetDBConnPool(db_name);
+  
+  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
+  return db_conn->Execute(query_string);
+}
+

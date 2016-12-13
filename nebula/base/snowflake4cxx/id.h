@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/wubenqi/snowflake4cxx
+ *  Copyright (c) 2016, https://github.com/nebula-im/snowflake4cxx
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

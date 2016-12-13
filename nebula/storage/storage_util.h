@@ -52,5 +52,18 @@ int SqlQuery(const std::string& db_name, QueryWithResult& q);
 int64_t SqlExecuteInsertID(const std::string& db_name, const BaseSqlQuery& query);
 int SqlExecute(const std::string& db_name, const BaseSqlQuery& query);
 
+enum QResultCode {
+  CONTINUE = 0,   // 继续
+  BREAK = 1,      // 停止
+  ERROR =2,       // 转换出错
+};
+
+using MakeQueryStringFunc = std::function<void(std::string& query_string)>;
+using MakeQueryResultFunc = std::function<int(db::QueryAnswer& answ)>;
+
+int DoStorageQuery(const std::string& db_name, MakeQueryStringFunc make_q, MakeQueryResultFunc make_r);
+int64_t DoStorageInsertID(const std::string& db_name, MakeQueryStringFunc make_q);
+int DoStorageExecute(const std::string& db_name, MakeQueryStringFunc make_q);
+
 #endif
 
