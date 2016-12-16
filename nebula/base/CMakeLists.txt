@@ -65,6 +65,7 @@ set (SRC_LIST
   io_buf_util.h
   #readline_gets.cc
   #readline_gets.h
+  time_syncor.h
 
   reflection_util.h
   traits.h

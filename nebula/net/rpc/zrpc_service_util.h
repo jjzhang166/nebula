@@ -24,6 +24,11 @@
 
 // ZRpc帮助类
 struct ZRpcUtil {
+  static ZRpcUtil& GetInstance() {
+    static ZRpcUtil g_instance;
+    return g_instance;
+  }
+  
   using  ServiceFunc = std::function<ProtoRpcResponsePtr(RpcRequestPtr)>;
 
   static folly::Future<ProtoRpcResponsePtr> DoClientCall(const std::string& service_name, RpcRequestPtr request);
@@ -38,7 +43,7 @@ protected:
   static ProtoRpcResponsePtr DoServiceCall(RpcRequestPtr request);
   
   // TODO(@benqi): 使用FuncFactoryManager
-  static std::map<int, ServiceFunc> g_rpc_services;
+  std::map<int, ServiceFunc> g_rpc_services;
 };
 
 #endif

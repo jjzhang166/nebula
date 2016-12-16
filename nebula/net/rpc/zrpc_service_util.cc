@@ -30,7 +30,7 @@
 
 #include "nebula/net/rpc/zrpc_client_handler.h"
 
-std::map<int, ZRpcUtil::ServiceFunc> ZRpcUtil::g_rpc_services;
+// std::map<int, ZRpcUtil::ServiceFunc> ZRpcUtil::g_rpc_services;
 // static ProtoRpcResponsePtr kEmptyResponse;
 
 folly::Future<ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& service_name, RpcRequestPtr request) {
@@ -66,11 +66,11 @@ folly::Future<ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& ser
 }
 
 void ZRpcUtil::Register(int method_id, ServiceFunc f) {
-  if (ContainsKey(g_rpc_services, method_id)) {
+  if (ContainsKey(GetInstance().g_rpc_services, method_id)) {
     // 重新检查
     LOG(FATAL) << "Register - duplicate entry for method_id: " << method_id;
   } else {
-    g_rpc_services.emplace(method_id, f);
+    GetInstance().g_rpc_services.emplace(method_id, f);
   }
 }
 
@@ -86,8 +86,8 @@ ProtoRpcResponsePtr ZRpcUtil::DoServiceCall(RpcRequestPtr request) {
   CHECK(request);
   
   ProtoRpcResponsePtr r;
-  auto it = g_rpc_services.find(request->method_id);
-  if (it != g_rpc_services.end()) {
+  auto it = GetInstance().g_rpc_services.find(request->method_id);
+  if (it != GetInstance().g_rpc_services.end()) {
     r = (it->second)(request);
     // r->set_message_id(GetNextIDBySnowflake());
     // return r;

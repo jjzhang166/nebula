@@ -15,37 +15,26 @@
  * limitations under the License.
  */
 
-#include "nebula/net/base_server.h"
+#include "zrpc_test_dispatcher.h"
 
 #include "zrpc_test.pb.h"
 #include "nebula/net/rpc/zrpc_service_util.h"
-
+#include "zrpc_test_service_impl.h"
 #include "nebula/net/zproto/api_message_box.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-class ZRpcServerTest : public nebula::BaseServer {
-public:
-  ZRpcServerTest() = default;
-  ~ZRpcServerTest() override = default;
-  
-protected:
-  bool Initialize() override {
-    RegisterService("zrpc_server_test", "rpc_server", "zrpc");
-    
-    // ZRpcUtil::Register("zproto.ZRpcTestReq", DoZRpcTestReq);
+static ZRpcTestDispatcher g_rpc_test_dispatcher;
 
-    BaseServer::Initialize();
-    return true;
-  }
-  
-  bool Run() override {
-    BaseServer::Run();
-    return true;
-  }
-};
-
-////////////////////////////////////////////////////////////////////////////
-int main(int argc, char* argv[]) {
-  return nebula::DoMain<ZRpcServerTest>(argc, argv);
+ZRpcTestDispatcher::ZRpcTestDispatcher() {
+  ZRpcUtil::Register("zproto.ZRpcTestReq", ZRpcTestDispatcher::OnZRpcTestReq);
 }
 
+ProtoRpcResponsePtr ZRpcTestDispatcher::OnZRpcTestReq(RpcRequestPtr request) {
+  CAST_RPC_REQUEST(ZRpcTestReq, rpc_test_req);
+  LOG(INFO) << rpc_test_req.Utf8DebugString();
+  zproto::ZRpcTestRsp message_rsp;
+  
+  ZRpcTestServiceImpl service_impl;
+  service_impl.OnZRpcTest(rpc_test_req, &message_rsp);
+  
+  return ::MakeRpcOK(message_rsp);
+}
