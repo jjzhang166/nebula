@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-include_directories(/usr/local/mysql/include)
+include_directories(/usr/local/mysql/include /usr/local/Cellar/hiredis/0.13.3/include/)
 
 set (SRC_LIST
  ./base_database.h
@@ -31,11 +31,14 @@ set (SRC_LIST
  ./db_base_object.h
  ./storage_util.cc
  ./storage_util.h
+
+ ./redis/redis_conn.cc
+ ./redis/redis_conn.h
 )
 
 
 add_library (storage ${SRC_LIST})
-target_link_libraries (storage /usr/local/mysql/lib/libmysqlclient.a)
+target_link_libraries (storage /usr/local/mysql/lib/libmysqlclient.a /usr/local/Cellar/hiredis/0.13.3/lib/libhiredis.a)
 
 add_subdirectory(test)
 

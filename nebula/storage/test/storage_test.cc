@@ -90,8 +90,27 @@ void StorageTest() {
   std::cout << app_entity.ToString() << std::endl;
 }
 
+#include "nebula/storage/redis/redis_conn.h"
 
-static nebula::TestingFuncManager g_testing_storage(StorageTest);
+void RedisConnTest() {
+  RedisAddrInfo addr;
+  RedisConn redis_conn;
+  redis_conn.Open(addr);
+  
+  LOG(INFO) << "test_incr_000: " << redis_conn.incr("test_incr_000");
+  LOG(INFO) << "test_incr_000: " << redis_conn.incr("test_incr_000", 20);
+  LOG(INFO) << "test_incr_000: " << redis_conn.decr("test_incr_000", 20);
+  LOG(INFO) << "test_incr_000: " << redis_conn.decr("test_incr_000");
+  
+  LOG(INFO) << "test_incr_000: " << redis_conn.hincr("htest_001", "fld");
+  LOG(INFO) << "test_incr_000: " << redis_conn.hincr("htest_001", "fld", 200);
+  LOG(INFO) << "test_incr_000: " << redis_conn.hdecr("htest_001", "fld");
+  LOG(INFO) << "test_incr_000: " << redis_conn.hdecr("htest_001", "fld", 200);
+
+}
+
+// static nebula::TestingFuncManager g_testing_storage(StorageTest);
+static nebula::TestingFuncManager g_testing_redis(RedisConnTest);
 
 
 int main(int argc, char* argv[]) {

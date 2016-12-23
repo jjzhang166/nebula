@@ -27,7 +27,6 @@
 // db::CdbConnPoolManager* g_db_conn_pool = nullptr;
 
 std::shared_ptr<db::CdbConnPoolManager> Make(const std::string db_name) {
-  
   db::DBAddrInfo db_addr;
   db_addr.host = "localhost";
   db_addr.port = 3307;
@@ -97,7 +96,7 @@ int64_t SqlExecuteInsertID(const std::string& db_name, const BaseSqlQuery& query
   query.SerializeToQuery(query_string);
   DCHECK(!query_string.empty());
 
-  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  // TODO(@benqi): 这里可能会出错返回，出错返回
   auto db_conn_pool = GetDBConnPool(db_name);
   db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
   return db_conn->ExecuteInsertID(query_string);
@@ -108,7 +107,7 @@ int SqlExecute(const std::string& db_name, const BaseSqlQuery& query) {
   query.SerializeToQuery(query_string);
   DCHECK(!query_string.empty());
 
-  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  // TODO(@benqi): 这里可能会出错返回，出错返回
   auto db_conn_pool = GetDBConnPool(db_name);
 
   db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
@@ -166,7 +165,7 @@ int64_t DoStorageInsertID(const std::string& db_name, MakeQueryStringFunc make_q
     return -2;
   }
   
-  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  // TODO(@benqi): 这里可能会出错返回，出错返回
   auto db_conn_pool = GetDBConnPool(db_name);
   db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
   return db_conn->ExecuteInsertID(query_string);
@@ -176,11 +175,11 @@ int DoStorageExecute(const std::string& db_name, MakeQueryStringFunc make_q) {
   std::string query_string;
   make_q(query_string);
   if (query_string.empty()) {
-    LOG(ERROR) << "DoStorageInsertID - make_q error, query_string is empty!!!";
+    LOG(ERROR) << "DoStorageExecute - make_q error, query_string is empty!!!";
     return -2;
   }
   
-  // TODO(@benqi): 这里可能会出错返回，出错返回-1234567
+  // TODO(@benqi): 这里可能会出错返回，出错返回
   auto db_conn_pool = GetDBConnPool(db_name);
   
   db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);

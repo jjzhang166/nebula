@@ -176,8 +176,8 @@ protected:
     })
     .onError([this, timeout](const std::exception& ex) {
       LOG(ERROR) << "TcpClient - Error connecting to : "
-      << config_.ToString()
-      << ", exception: " << folly::exceptionStr(ex);
+          << config_.ToString()
+          << ", exception: " << folly::exceptionStr(ex);
       
       // folly::EventBaseManager::get()->getEventBase();
       auto main_eb = client_->getEventBase();

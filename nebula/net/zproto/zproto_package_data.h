@@ -81,6 +81,8 @@ struct AttachDataMessage  {
   std::string ToString() const;
 };
 
+typedef AttachDataMessage S2SAttachData;
+
 // Transport Level
 // 0xFF
 // 0x00001 000
