@@ -34,7 +34,7 @@ public:
   // evb为nullptr, 则使用当前线程
 	explicit TimerManager(folly::EventBase* evb = nullptr)
     : main_evb_(evb ? evb : folly::EventBaseManager::get()->getEventBase()),
-      wheel_(folly::HHWheelTimer::newTimer(evb)) {
+      wheel_(folly::HHWheelTimer::newTimer(main_evb_)) {
   }
   ~TimerManager() = default;
 

@@ -25,11 +25,14 @@
 #include "nebula/net/engine/tcp_client_group.h"
 #include "nebula/net/engine/tcp_client.h"
 #include "nebula/net/engine/tcp_server.h"
+#include "nebula/net/thread_local_conn_manager.h"
 
 #include "nebula/net/handler/zproto/zproto_pipeline_factory.h"
 
 using namespace nebula;
 
+// 保活心跳
+#define HEARTBEAT_TIMEOUT 10000 // 心跳间隔时间：10s
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // 不能直接使用静态类注册的原因:
@@ -87,7 +90,7 @@ void ZProtoHandler::readException(Context* ctx, folly::exception_wrapper e) {
 
 void ZProtoHandler::transportActive(Context* ctx) {
   auto pipeline = dynamic_cast<ZProtoPipeline*>(ctx->getPipeline());
-  OnNewConnection(pipeline, pipeline->getTransportInfo()->remoteAddr->getAddressStr());
+  auto conn_id = OnNewConnection(pipeline, pipeline->getTransportInfo()->remoteAddr->getAddressStr());
   
   LOG(INFO) << "transportActive - conn_id = " << conn_id_
             << ", ZProtoHandler - Connection connected by "
@@ -97,6 +100,11 @@ void ZProtoHandler::transportActive(Context* ctx) {
   int rv = ZProtoEventCallback::OnNewConnection(service_, pipeline);
   if (rv == -1) {
     // TODO(@benqi): 是否需要断开或其它处理
+  }
+
+  // 客户端主动保活
+  if (service_->GetServiceType() == "tcp_client") {
+    ZProtoHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT, false);
   }
 }
 
@@ -123,3 +131,19 @@ folly::Future<folly::Unit> ZProtoHandler::close(Context* ctx) {
   return ctx->fireClose();
 }
 
+void ZProtoHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout, bool is_send) {
+  if (is_send) {
+    auto pl = GetConnManagerByThreadLocal().FindPipeline(conn_id);
+    if (pl) {
+      Ping ping("zproto_handler");
+      std::unique_ptr<folly::IOBuf> data;
+      ping.SerializeToIOBuf(data);
+      nebula::write(pl, std::move(data));
+    }
+  }
+
+  folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+  main_eb->runAfterDelay([conn_id, timeout] {
+    ZProtoHandler::DoHeartBeat(conn_id, timeout, true);
+  }, timeout);
+}

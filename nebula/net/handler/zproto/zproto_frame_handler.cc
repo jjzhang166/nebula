@@ -192,6 +192,8 @@ void ZProtoFrameHandler::OnProtoRawData(Context* ctx, std::shared_ptr<FrameMessa
 
 void ZProtoFrameHandler::OnPing(Context* ctx, std::shared_ptr<FrameMessage> message) {
   CAST_PROTO_MESSAGE(Ping, ping);
+  LOG(INFO) << "OnPing - recv ping";
+
   // 直接返回
   Pong pong;
   pong.random_bytes.swap(ping->random_bytes);

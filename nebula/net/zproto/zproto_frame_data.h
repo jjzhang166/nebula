@@ -170,6 +170,11 @@ struct Ping : public FrameMessage {
     HEADER = Frame::PING
   };
 
+  Ping() = default;
+  explicit Ping(const std::string& r) {
+    random_bytes = folly::IOBuf::copyBuffer(r);
+  }
+  
   uint8_t GetFrameType() const override {
     return HEADER;
   }
