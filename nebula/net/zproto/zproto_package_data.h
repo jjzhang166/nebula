@@ -33,15 +33,36 @@ struct PackageHeader {
 };
 
 struct AttachDataMessage  {
-  uint8_t     proto_revision {0};
+  uint8_t     proto_revision {1};
   uint64_t    birth_timetick {0};         // 服务端收到一条消息后设置服务端当前时间戳，用来计算每个链路的调用耗时
   uint64_t    birth_track_uuid {0};
-  std::string birth_from;
-  uint32_t    birth_server_id {0};
+  std::string birth_from {"127.0.0.1"};
+  uint32_t    birth_server_id {1};
   uint64_t    birth_conn_id {0};
-  std::string birth_remote_ip;
+  std::string birth_remote_ip {"127.0.0.1"};
   
   struct OptionData {
+    OptionData() = default;
+    
+    OptionData& operator=(const OptionData& o) {
+      type = o.type;
+      if (type == 0) {
+        data.n = o.data.n;
+      } else {
+        data.s = new std::string(*o.data.s);
+      }
+      return *this;
+    }
+
+    OptionData(const OptionData& o) {
+      type = o.type;
+      if (type == 0) {
+        data.n = o.data.n;
+      } else {
+        data.s = new std::string(*o.data.s);
+      }
+    }
+    
     ~OptionData() {
       if (type == 1) {
         delete data.s;
@@ -295,6 +316,30 @@ struct PackageMessage {
     iobw.writeBE(package_header.auth_id);
     iobw.writeBE(package_header.session_id);
     iobw.writeBE(package_header.message_id);
+
+    if (_has_attach_data) {
+      iobw.writeBE((uint8_t)Package::ATTACH_DATA_MESSAGE);
+      iobw.writeBE(attach_data.proto_revision);
+      iobw.writeBE(attach_data.birth_timetick);
+      iobw.writeBE(attach_data.birth_track_uuid);
+      WriteString(iobw, attach_data.birth_from);
+      iobw.writeBE(attach_data.birth_server_id);
+      iobw.writeBE(attach_data.birth_conn_id);
+      WriteString(iobw, attach_data.birth_remote_ip);
+      
+      // write options
+      iobw.writeBE((uint32_t)attach_data.options.size());
+      for (auto& v : attach_data.options) {
+        iobw.writeBE(v.type);
+        if (v.type == 0) {
+          iobw.writeBE(v.data.n);
+        } else {
+          WriteString(iobw, *v.data.s);
+        }
+      }
+      // WriteMapStringString(iobw, attachx_data.options);
+    }
+
     iobw.writeBE(GetPackageType());
   }
   

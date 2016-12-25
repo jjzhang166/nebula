@@ -82,6 +82,24 @@ int RedisConn::ReConnect() {
   }
 }
 
+std::string RedisConn::set(const std::string& key, const std::string &value) {
+  std::string ret_value;
+
+  if(ReConnect()) return ret_value;
+  
+  redisReply* reply = (redisReply *)redisCommand(context_, "SET %s %s", key.c_str(), value.c_str());
+  if (!reply) {
+    LOG(ERROR) << "set - redis Command failed: " << context_->errstr << ", by " << addr_.ToString();
+    redisFree(context_);
+    context_ = nullptr;
+    return ret_value;
+  }
+  
+  ret_value.append(reply->str, reply->len);
+  freeReplyObject(reply);
+  return ret_value;
+}
+
 int64_t RedisConn::incr(const std::string& key) {
   if(ReConnect()) return -1;
   

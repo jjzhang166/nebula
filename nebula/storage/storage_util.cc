@@ -26,6 +26,8 @@
 // db::CdbConnPoolManager* g_db_conn_pool = nullptr;
 // db::CdbConnPoolManager* g_db_conn_pool = nullptr;
 
+namespace {
+  
 std::shared_ptr<db::CdbConnPoolManager> Make(const std::string db_name) {
   db::DBAddrInfo db_addr;
   db_addr.host = "localhost";
@@ -41,6 +43,7 @@ std::shared_ptr<db::CdbConnPoolManager> Make(const std::string db_name) {
 }
 
 db::CdbConnPoolManager* GetDBConnPool(const std::string& db_name) {
+  // TODO(@benqi): 有问题
   static std::map<std::string, std::shared_ptr<db::CdbConnPoolManager>> g_db_conn_pools;
   
   auto it = g_db_conn_pools.find(db_name);
@@ -51,6 +54,8 @@ db::CdbConnPoolManager* GetDBConnPool(const std::string& db_name) {
   } else {
     return it->second.get();
   }
+}
+  
 }
 
 int SqlQuery(const std::string& db_name, QueryWithResult& q) {

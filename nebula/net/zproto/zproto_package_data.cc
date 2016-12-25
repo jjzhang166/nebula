@@ -88,7 +88,10 @@ std::string AttachDataMessage::ToString() const {
 bool Package::Decode(ProtoRawData& proto_raw_data) {
   message.swap(proto_raw_data.message_data);
   try {
+    folly::io::Cursor c_b(message.get());
     folly::io::Cursor c(message.get());
+
+    // size_t trim_size = HEADER_LEN;
     
     package_header.auth_id = c.readBE<int64_t>();
     package_header.session_id = c.readBE<int64_t>();
@@ -96,6 +99,7 @@ bool Package::Decode(ProtoRawData& proto_raw_data) {
     // TODO(@benqi): 加密功能添加
     //  auth_id为0未加密，为0则加密
     package_header.message_id = c.readBE<int64_t>();
+
     package_type = c.readBE<uint8_t>();
     if (package_type == Package::ATTACH_DATA_MESSAGE) {
       _has_attach_data = true;
@@ -124,9 +128,11 @@ bool Package::Decode(ProtoRawData& proto_raw_data) {
       }
       // ReadMapStringString(c, attach_data.options);
       package_type = c.readBE<uint8_t>();
+      
+      // trim_size += attach_data.CalcPackageSize();
     }
-    
-    nebula::io_buf_util::TrimStart(message.get(), HEADER_LEN);
+
+    nebula::io_buf_util::TrimStart(message.get(), c-c_b);
   } catch(...) {
     // TODO(@wubenqi): error's log
     return false;
@@ -151,28 +157,6 @@ bool PackageMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) con
     iobw.writeBE((uint8_t)0);
     iobw.writeBE((uint16_t)0);
     
-    if (_has_attach_data) {
-      iobw.writeBE((uint8_t)Package::ATTACH_DATA_MESSAGE);
-      iobw.writeBE(attach_data.proto_revision);
-      iobw.writeBE(attach_data.birth_timetick);
-      iobw.writeBE(attach_data.birth_track_uuid);
-      WriteString(iobw, attach_data.birth_from);
-      iobw.writeBE(attach_data.birth_server_id);
-      iobw.writeBE(attach_data.birth_conn_id);
-      WriteString(iobw, attach_data.birth_remote_ip);
-      
-      // write options
-      iobw.writeBE((uint32_t)attach_data.options.size());
-      for (auto& v : attach_data.options) {
-        iobw.writeBE(v.type);
-        if (v.type == 0) {
-          iobw.writeBE(v.data.n);
-        } else {
-          WriteString(iobw, *v.data.s);
-        }
-      }
-      // WriteMapStringString(iobw, attachx_data.options);
-    }
     
     // iobw.writeBE(GetPackageType());
     

@@ -22,6 +22,8 @@
 // #include <folly/Range.h>
 
 struct RedisAddrInfo {
+  std::string name;
+  
   std::string host {"127.0.0.1"};
   int port {6379};
   int db_number {0};
@@ -39,6 +41,8 @@ public:
 
   int Open(const RedisAddrInfo& addr);
   
+  std::string set(const std::string& key, const std::string &value);
+
   int64_t incr(const std::string& key);
   int64_t incr(const std::string& key, int64_t value);
   int64_t hincr(const std::string& key, const std::string& field);
@@ -49,6 +53,7 @@ public:
   int64_t hdecr(const std::string& key, const std::string& field);
   int64_t hdecr(const std::string& key, const std::string& field, int64_t value);
 
+  
 private:
   int ReConnect();
   

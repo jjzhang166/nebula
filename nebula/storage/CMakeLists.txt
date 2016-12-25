@@ -34,6 +34,8 @@ set (SRC_LIST
 
  ./redis/redis_conn.cc
  ./redis/redis_conn.h
+ ./redis/redis_pool.cc
+ ./redis/redis_pool.h
 )
 
 
