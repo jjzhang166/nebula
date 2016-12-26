@@ -104,7 +104,10 @@ void ZProtoHandler::transportActive(Context* ctx) {
 
   // 客户端主动保活
   if (service_->GetServiceType() == "tcp_client") {
-    ZProtoHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT, false);
+    folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+    main_eb->runAfterDelay([conn_id] {
+      ZProtoHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT);
+    }, HEARTBEAT_TIMEOUT);
   }
 }
 
@@ -131,19 +134,19 @@ folly::Future<folly::Unit> ZProtoHandler::close(Context* ctx) {
   return ctx->fireClose();
 }
 
-void ZProtoHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout, bool is_send) {
-  if (is_send) {
-    auto pl = GetConnManagerByThreadLocal().FindPipeline(conn_id);
-    if (pl) {
-      Ping ping("zproto_handler");
-      std::unique_ptr<folly::IOBuf> data;
-      ping.SerializeToIOBuf(data);
-      nebula::write(pl, std::move(data));
-    }
+// TODO(@benqi): 可以使用std::weak_ptr<ZRpcClientPipeline>代替conn_id
+// 减少一次FindPipeline
+void ZProtoHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout) {
+  auto pl = GetConnManagerByThreadLocal().FindPipeline(conn_id);
+  if (pl) {
+    Ping ping("zproto_handler");
+    std::unique_ptr<folly::IOBuf> data;
+    ping.SerializeToIOBuf(data);
+    nebula::write(pl, std::move(data));
+    
+    folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+    main_eb->runAfterDelay([conn_id, timeout] {
+      ZProtoHandler::DoHeartBeat(conn_id, timeout);
+    }, timeout);
   }
-
-  folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
-  main_eb->runAfterDelay([conn_id, timeout] {
-    ZProtoHandler::DoHeartBeat(conn_id, timeout, true);
-  }, timeout);
 }

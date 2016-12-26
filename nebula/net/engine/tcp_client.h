@@ -143,6 +143,7 @@ public:
   }
   
 protected:
+  // TODO(@benqi): 支持更多的重连策略，比如指数级重试
   void DoConnect(int timeout = 0) {
     client_->connect(conn_address_, std::chrono::milliseconds(timeout))
     .then([this](Pipeline* pipeline) {

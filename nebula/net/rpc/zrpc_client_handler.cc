@@ -68,7 +68,10 @@ void ZRpcClientHandler::transportActive(Context* ctx) {
   
   // 客户端主动保活
   if (service_->GetServiceType() == "rpc_client") {
-    ZRpcClientHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT, false);
+    folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+    main_eb->runAfterDelay([conn_id] {
+      ZRpcClientHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT);
+    }, HEARTBEAT_TIMEOUT);
   }
 }
 
@@ -96,8 +99,9 @@ folly::Future<ProtoRpcResponsePtr> ZRpcClientHandler::ServiceCall(RpcRequestPtr 
   return (*rpc_service_)(arg);
 }
 
-void ZRpcClientHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout, bool is_send) {
-  if (is_send) {
+// TODO(@benqi): 可以使用std::weak_ptr<ZRpcClientPipeline>代替conn_id
+// 减少一次FindPipeline
+void ZRpcClientHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout) {
     auto plb = nebula::GetConnManagerByThreadLocal().FindPipeline(conn_id);
     if (plb) {
       
@@ -109,11 +113,11 @@ void ZRpcClientHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout, bool is_
       auto h = pl->getHandler<ZProtoPackageHandler>();
       auto ctx = pl->getContext<ZProtoPackageHandler>();
       h->write(ctx, std::move(data));
+      
+      // 连接存在则发送Ping
+      folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+      main_eb->runAfterDelay([conn_id, timeout] {
+        ZRpcClientHandler::DoHeartBeat(conn_id, timeout);
+      }, timeout);
     }
-  }
-  
-  folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
-  main_eb->runAfterDelay([conn_id, timeout] {
-    ZRpcClientHandler::DoHeartBeat(conn_id, timeout, true);
-  }, timeout);
 }
