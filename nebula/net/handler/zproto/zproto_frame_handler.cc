@@ -192,7 +192,7 @@ void ZProtoFrameHandler::OnProtoRawData(Context* ctx, std::shared_ptr<FrameMessa
 
 void ZProtoFrameHandler::OnPing(Context* ctx, std::shared_ptr<FrameMessage> message) {
   CAST_PROTO_MESSAGE(Ping, ping);
-  LOG(INFO) << "OnPing - recv ping";
+  // LOG(INFO) << "OnPing - recv ping";
 
   // 直接返回
   Pong pong;
@@ -204,7 +204,7 @@ void ZProtoFrameHandler::OnPong(Context* ctx, std::shared_ptr<FrameMessage> mess
   CAST_PROTO_MESSAGE(Pong, pong);
   
   // TODO(@benqi): 调试环境开启
-  LOG(INFO) << "OnPong - recv pong";
+  // LOG(INFO) << "OnPong - recv pong";
 }
 
 void ZProtoFrameHandler::OnDrop(Context* ctx, std::shared_ptr<FrameMessage> message) {
