@@ -28,6 +28,8 @@
 
 #include "nebula/storage/redis/redis_conn.h"
 
+// TODO(@benqi): 功能和CdbConnPoolManager类似
+//   抽象出通用代码，可支持后续的Mongo连接池等
 class RedisConnPoolManager {
 public:
   RedisConnPoolManager()
@@ -38,8 +40,6 @@ public:
     Shutdown();
   }
   
-  // 返回连接mysql数量
-  //size_t Initialize(const std::string& conn_string, int min_conn_count=2, int max_conn_count=5);
   size_t Initialize(const RedisAddrInfo& addr);
   // 小心使用，必须所有的连接回收以后才能执行
   void Shutdown();
