@@ -31,18 +31,7 @@ struct SystemConfig : public Configurable {
     bool SetConf(const std::string& conf_name, const Configuration& conf) override;
 
     void PrintDebug() const {
-        std::cout << "io_thread_pool_size: " << io_thread_pool_size << std::endl;
     }
-
-    // AccessServerConfig access_config_;
-    uint32_t io_thread_pool_size = {0};     // 1：为单线程，
-                                            // 未设置：为一个核一个线程
-                                            // n：为n个线程
-    
-    // uint32_t srv_number;                    // 服务器编号
-    // 机房.集群.组.服务名.编号
-
-    // LOG
 };
 
 }

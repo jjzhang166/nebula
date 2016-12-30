@@ -33,15 +33,8 @@ BaseServer::BaseServer() {
   config_manager->Register("thread_group", &thread_group_options_);
 }
 
-size_t BaseServer::GetIOThreadPoolSize() {
-  return io_thread_pool_size_;
-}
-
 bool BaseServer::LoadConfig(const std::string& config_path) {
   bool rv = BaseDaemon::LoadConfig(config_path);
-  if (rv) {
-    io_thread_pool_size_ = system_config_.io_thread_pool_size;
-  }
   return rv;
 }
 
