@@ -34,24 +34,24 @@ struct WriterUtil {
   template <typename T>
   static folly::Future<folly::Unit> Write(uint64_t conn_id, T msg) {
     auto net_engine = nebula::NetEngineManager::GetInstance();
-    auto& conn_manager = nebula::GetConnManagerByThreadLocal();
+    // auto& conn_manager = nebula::GetConnManagerByThreadLocal();
     
     uint32_t tid = conn_id >> 32;
     // 检查是否在同一线程
-    if (conn_manager.is_self_thread(tid)) {
-      // 同一线程里
-      auto pipeline = conn_manager.FindPipeline(conn_id);
-      if (!pipeline) {
-        LOG(ERROR) << "Write - invalid error, not find conn_id: " << nebula::ToString(conn_id);
-        return folly::makeFuture();
-      }
-      
-      // return write(pipeline, std::forward(msg));
-      return nebula::write<T>(pipeline, std::forward<T>(msg));
-
-    } else {
-      // 不在同一线程。
-      // 应用层要尽可能要让发送在同一线程里
+//    if (conn_manager.is_self_thread(tid)) {
+//      // 同一线程里
+//      auto pipeline = conn_manager.FindPipeline(conn_id);
+//      if (!pipeline) {
+//        LOG(ERROR) << "Write - invalid error, not find conn_id: " << nebula::ToString(conn_id);
+//        return folly::makeFuture();
+//      }
+//      
+//      // return write(pipeline, std::forward(msg));
+//      return nebula::write<T>(pipeline, std::forward<T>(msg));
+//
+//    } else {
+//      // 不在同一线程。
+//      // 应用层要尽可能要让发送在同一线程里
       auto evb = net_engine->GetEventBaseByThreadID(tid);
       if (!evb) {
         LOG(ERROR) << "Write - invalid error, not find thread_id: " << nebula::ToString(conn_id);
@@ -79,7 +79,7 @@ struct WriterUtil {
       });
 
       return f;
-    }
+//    }
   }
   
   template <typename T>
