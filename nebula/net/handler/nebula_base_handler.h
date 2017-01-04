@@ -50,7 +50,7 @@ public:
   }
   
   virtual ~NebulaBaseHandler() = default;
-  
+    
   // uint64_t ThreadLocalConnManager::OnNewConnection(wangle::PipelineBase* pipeline) {
 
   uint64_t OnNewConnection(wangle::PipelineBase* pipeline, const std::string& remote_address);

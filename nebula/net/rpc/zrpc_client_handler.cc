@@ -19,6 +19,13 @@
 
 #include <folly/MoveWrapper.h>
 
+#include "nebula/net/thread_local_conn_manager.h"
+
+#include "nebula/net/handler/zproto/zproto_package_handler.h"
+
+// 保活心跳
+#define HEARTBEAT_TIMEOUT 10000 // 心跳间隔时间：10s
+
 void ZRpcClientHandler::read(Context* ctx, PackageMessagePtr msg) {
   LOG(INFO) << "read - received data: " << msg->ToString();
   auto received = std::static_pointer_cast<ProtoRpcResponse>(msg);
@@ -48,7 +55,7 @@ void ZRpcClientHandler::readException(Context* ctx, folly::exception_wrapper e) 
 
 void ZRpcClientHandler::transportActive(Context* ctx) {
   auto pipeline = dynamic_cast<ZRpcClientPipeline*>(ctx->getPipeline());
-  OnNewConnection(pipeline, pipeline->getTransportInfo()->remoteAddr->getAddressStr());
+  auto conn_id = OnNewConnection(pipeline, pipeline->getTransportInfo()->remoteAddr->getAddressStr());
   
   LOG(INFO) << "transportActive - conn_id = " << conn_id_
               << ", Connection connected by "
@@ -58,6 +65,14 @@ void ZRpcClientHandler::transportActive(Context* ctx) {
   auto dispatcher = std::make_shared<ZRpcMultiplexClientDispatcher>();
   dispatcher->setPipeline(pipeline);
   rpc_service_ = std::make_shared<ZRpcClientFilter>(dispatcher);
+  
+  // 客户端主动保活
+  if (service_->GetServiceType() == "rpc_client") {
+    folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+    main_eb->runAfterDelay([conn_id] {
+      ZRpcClientHandler::DoHeartBeat(conn_id, HEARTBEAT_TIMEOUT);
+    }, HEARTBEAT_TIMEOUT);
+  }
 }
 
 void ZRpcClientHandler::transportInactive(Context* ctx) {
@@ -84,3 +99,25 @@ folly::Future<ProtoRpcResponsePtr> ZRpcClientHandler::ServiceCall(RpcRequestPtr 
   return (*rpc_service_)(arg);
 }
 
+// TODO(@benqi): 可以使用std::weak_ptr<ZRpcClientPipeline>代替conn_id
+// 减少一次FindPipeline
+void ZRpcClientHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout) {
+    auto plb = nebula::GetConnManagerByThreadLocal().FindPipeline(conn_id);
+    if (plb) {
+      
+      Ping ping("zrpc_client_handler");
+      std::unique_ptr<folly::IOBuf> data;
+      ping.SerializeToIOBuf(data);
+      
+      auto pl = dynamic_cast<ZRpcClientPipeline*>(plb);
+      auto h = pl->getHandler<ZProtoPackageHandler>();
+      auto ctx = pl->getContext<ZProtoPackageHandler>();
+      h->write(ctx, std::move(data));
+      
+      // 连接存在则发送Ping
+      folly::EventBase* main_eb = folly::EventBaseManager::get()->getEventBase();
+      main_eb->runAfterDelay([conn_id, timeout] {
+        ZRpcClientHandler::DoHeartBeat(conn_id, timeout);
+      }, timeout);
+    }
+}

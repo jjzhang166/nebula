@@ -62,6 +62,12 @@ struct NebulaEventCallback {
     }
   }
 
+  static void Destroy() {
+    g_new_connection = nullptr;
+    g_data_received = nullptr;
+    g_connection_closed = nullptr;
+  }
+  
   ///////////////////////////////////////////////////////////////////////////////////////
   static NewConnectionFunc g_new_connection;
   static DataReceivedFunc g_data_received;

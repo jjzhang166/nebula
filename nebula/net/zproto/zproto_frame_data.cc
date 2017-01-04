@@ -101,12 +101,21 @@ bool FrameMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const
   try {
     // Frame
     
+    iobw.writeBE(uint16_t(0x5342));
+    iobw.writeBE((uint16_t)(1));
+    iobw.writeBE(GetFrameType());
+    
+    // iobw.writeBE((uint8_t)(buf_len >> 16));
+    // iobw.writeBE((uint16_t)buf_len & 0xffff);
+    iobw.writeBE((uint8_t)0);
+    iobw.writeBE((uint16_t)0);
+
     // TODO(@benqi): 使用skip(sizoef(uint32_t))
     // magic_number + frame_index
-    iobw.writeBE((uint32_t)0);
+    // iobw.writeBE((uint32_t)0);
     // iobw.writeBE((uint16_t)0);
     
-    iobw.writeBE((uint32_t) GetFrameType()>>24 & ((CalcFrameSize()-FrameMessage::CalcFrameSize()) & 0xffffff));
+    // iobw.writeBE((uint32_t) GetFrameType()>>24 & ((CalcFrameSize()-FrameMessage::CalcFrameSize()) & 0xffffff));
     // iobw.writeBE(buf_len);
     
     Encode(iobw);
@@ -117,6 +126,9 @@ bool FrameMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const
     // 返回值
     io_buf = std::move(io_buf2);
     
+    auto size = io_buf->computeChainDataLength();
+    WriteBodyLength(static_cast<uint32_t>(size-12), io_buf.get());
+
   } catch(const std::exception& e) {
     LOG(ERROR) << "SerializeToIOBuf - catch a threwn exception: " << folly::exceptionStr(e);
     rv = false;

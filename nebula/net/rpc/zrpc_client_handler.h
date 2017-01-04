@@ -46,8 +46,13 @@ public:
   folly::Future<ProtoRpcResponsePtr> ServiceCall(RpcRequestPtr arg);
 
 protected:
-    // std::shared_ptr<ZRpcMultiplexClientDispatcher> dispatcher_;
-    std::shared_ptr<ZRpcClientFilter> rpc_service_;
+  // TODO(@benqi): s2s应用场景里，连接发起方需要保活，逻辑基本一样，
+  //  后续zrpc_client_handler/zproto_handler等统一处理
+  //  更智能的保活策略
+  static void DoHeartBeat(uint64_t conn_id, uint32_t timeout);
+
+  // std::shared_ptr<ZRpcMultiplexClientDispatcher> dispatcher_;
+  std::shared_ptr<ZRpcClientFilter> rpc_service_;
 };
 
 #endif

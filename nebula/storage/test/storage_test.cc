@@ -90,8 +90,39 @@ void StorageTest() {
   std::cout << app_entity.ToString() << std::endl;
 }
 
+#include "nebula/storage/redis/redis_conn.h"
 
-static nebula::TestingFuncManager g_testing_storage(StorageTest);
+void RedisConnTest() {
+  RedisAddrInfo addr;
+  RedisConn redis_conn;
+  redis_conn.Open(addr);
+  
+  LOG(INFO) << "test_incr_000: " << redis_conn.incr("test_incr_0001");
+  LOG(INFO) << "test_incr_000: " << redis_conn.incr("test_incr_0001", 20);
+  LOG(INFO) << "test_incr_000: " << redis_conn.decr("test_incr_0001", 20);
+  LOG(INFO) << "test_incr_000: " << redis_conn.decr("test_incr_0001");
+  
+  LOG(INFO) << "test_incr_000: " << redis_conn.hincr("htest_001", "fld");
+  LOG(INFO) << "test_incr_000: " << redis_conn.hincr("htest_001", "fld", 200);
+  LOG(INFO) << "test_incr_000: " << redis_conn.hdecr("htest_001", "fld");
+  LOG(INFO) << "test_incr_000: " << redis_conn.hdecr("htest_001", "fld", 200);
+
+}
+
+#include "nebula/storage/redis/redis_pool.h"
+
+void RedisConnPoolTest() {
+  auto pool = GetRedisConnPool("name");
+  ScopedPtr_RedisConnection conn(pool);
+  LOG(INFO) << "test_incr_000: " << conn->incr("test_incr_0001");
+  LOG(INFO) << "test_incr_000: " << conn->incr("test_incr_0001");
+  LOG(INFO) << "test_incr_000: " << conn->incr("test_incr_0001");
+  LOG(INFO) << "test_incr_000: " << conn->incr("test_incr_0001");
+}
+
+// static nebula::TestingFuncManager g_testing_storage(StorageTest);
+// static nebula::TestingFuncManager g_testing_redis(RedisConnTest);
+static nebula::TestingFuncManager g_testing_redis_pool(RedisConnPoolTest);
 
 
 int main(int argc, char* argv[]) {

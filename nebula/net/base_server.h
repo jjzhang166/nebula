@@ -36,13 +36,7 @@ public:
   BaseServer();
   ~BaseServer() override = default;
   
-  size_t GetIOThreadPoolSize();
-  
 protected:
-  void set_io_thread_pool_size(size_t v) {
-    io_thread_pool_size_ = v;
-  }
-  
   // 必须初始化以后才能调用
   void RegisterService(const std::string& name, const std::string& type, const std::string& proto) {
     // TODO(@benqi):
@@ -54,9 +48,6 @@ protected:
   bool Initialize() override;
   bool Run() override;
   bool Destroy() override;
-  
-  // 为0默认多线程模式
-  size_t io_thread_pool_size_{0};
   
   // std::map<uint64_t, uint32_t> connected_server_map_;
   ServicesConfig services_config_;

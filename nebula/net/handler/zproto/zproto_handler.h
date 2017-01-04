@@ -28,6 +28,7 @@
 // #include "nebula/net/handler/nebula_event_callback.h"
 
 // using TeamtalkPipeline = wangle::Pipeline<folly::IOBufQueue&, std::shared_ptr<teamtalk::PackageMessage>>;
+
 using ZProtoEventCallback = NebulaEventCallback<nebula::ZProtoPipeline, PackageMessagePtr>;
 
 class ZProtoHandler : public wangle::HandlerAdapter<std::shared_ptr<PackageMessage>, std::unique_ptr<folly::IOBuf>>, public nebula::NebulaBaseHandler {
@@ -47,6 +48,11 @@ public:
   void transportInactive(Context* ctx) override;
 
   folly::Future<folly::Unit> close(Context* ctx) override;
+  
+private:
+  // TODO(@benqi): s2s应用场景里，连接发起方需要保活，逻辑基本一样，
+  //  后续zrpc_client_handler/zproto_handler等统一处理
+  static void DoHeartBeat(uint64_t conn_id, uint32_t timeout);
 };
 
 void ModuleZProtoInitialize();

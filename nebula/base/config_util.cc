@@ -25,12 +25,8 @@
 namespace nebula {
   
 bool SystemConfig::SetConf(const std::string& conf_name, const Configuration& conf) {
-    folly::dynamic v = nullptr;
-    
-    v = conf.GetValue("io_thread_pool_size");
-    if (v.isInt()) io_thread_pool_size = static_cast<uint32_t>(v.asInt());
-
-    return true;
+  // TODO(@benqi): 通用配置
+  return true;
 }
 
 }

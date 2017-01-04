@@ -29,14 +29,9 @@
 namespace nebula {
 
 #define RECONNECT_TIMEOUT 10000 // 重连间隔时间：10s
-#define HEARTBEAT_TIMEOUT 10000 // 心跳间隔时间：10s
   
 // TODO(@benqi)
-//  如果连接断开以后，如何保证数据可靠
-//  先不管
 // 一旦分配到一个线程，即使断开重连，也落在这个线程里
-// class TcpClientGroup;
-
 template <typename Pipeline = DefaultPipeline>
 class TcpClient : public TcpServiceBase, public wangle::PipelineManager {
 public:
@@ -148,36 +143,18 @@ public:
   }
   
 protected:
-  void DoHeartBeat(bool is_send) {
-    if (connected_.load()) {
-      if (is_send) {
-        //            impdu::CImPduHeartBeat heart_beat;
-        //            auto buf = folly::IOBuf::create(heart_beat.GetByteSize());
-        //            buf->append(heart_beat.GetByteSize());
-        //            heart_beat.SerializeToIOBuf(buf.get());
-        //            this->client_->getPipeline()->write(std::move(buf));
-      }
-      
-      auto main_eb = client_->getEventBase();
-      main_eb->runAfterDelay([&] {
-        this->DoHeartBeat(true);
-      }, HEARTBEAT_TIMEOUT);
-    }
-  }
-  
+  // TODO(@benqi): 支持更多的重连策略，比如指数级重试
   void DoConnect(int timeout = 0) {
     client_->connect(conn_address_, std::chrono::milliseconds(timeout))
     .then([this](Pipeline* pipeline) {
       LOG(INFO) << "TcpClient - Connect sucess: " << config_.ToString();
       pipeline->setPipelineManager(this);
       this->connected_.store(true);
-      
-      DoHeartBeat(false);
     })
     .onError([this, timeout](const std::exception& ex) {
       LOG(ERROR) << "TcpClient - Error connecting to : "
-      << config_.ToString()
-      << ", exception: " << folly::exceptionStr(ex);
+          << config_.ToString()
+          << ", exception: " << folly::exceptionStr(ex);
       
       // folly::EventBaseManager::get()->getEventBase();
       auto main_eb = client_->getEventBase();
