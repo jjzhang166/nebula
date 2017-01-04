@@ -30,15 +30,6 @@ class IOBuf;
 
 namespace nebula {
   
-// 数据转发策略
-enum class DispatchStrategy : int {
-  kDefault = 0,           // 默认，使用kRandom
-  kRandom = 1,            // 随机
-  kRoundRobin = 2,        // 轮询
-  kConsistencyHash = 3,   // 一致性hash
-  kBroadCast = 4,         // 广播
-};
-
 enum class ServiceModuleType : int {
     INVALID = 0,
     TCP_SERVER = 1,

@@ -29,12 +29,13 @@ bool HttpServer::Start() {
       {folly::SocketAddress(config_.hosts.c_str(), static_cast<uint16_t>(config_.port), true), proxygen::HTTPServerLib::Protocol::HTTP},
   };
 
-//  wangle::SSLContextConfig sslCfg;
-//  sslCfg.isDefault = true;
-//  sslCfg.setCertificate("./certs/test_cert1.pem",
-//                        "./certs/test_key1.pem",
-//                        "");
-//  IPs[0].sslConfigs.push_back(sslCfg);
+  // TODO(@benqi): https支持
+  //  wangle::SSLContextConfig sslCfg;
+  //  sslCfg.isDefault = true;
+  //  sslCfg.setCertificate("./certs/test_cert1.pem",
+  //                        "./certs/test_key1.pem",
+  //                        "");
+  //  IPs[0].sslConfigs.push_back(sslCfg);
   
   proxygen::HTTPServerOptions options;
   // options.threads = static_cast<size_t>(FLAGS_threads);

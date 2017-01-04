@@ -19,9 +19,7 @@
 #define NEBULA_BASE_PLUGIN_H_
 
 #include <string>
-
-#include "nebula/base/configuration.h"
-
+#include <folly/dynamic.h>
 namespace nebula {
 
 class Plugin {
@@ -30,7 +28,7 @@ public:
   
   
   virtual const std::string& GetPluginName() const = 0;
-  virtual void Install(const Configuration& conf) = 0;
+  virtual void Install(const folly::dynamic& conf) = 0;
   
   virtual void Initialize() = 0;
   virtual void Shutdown() = 0;

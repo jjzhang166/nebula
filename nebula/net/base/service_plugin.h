@@ -19,25 +19,19 @@
 #define NEBULA_NET_BASE_SERVICE_PLUGIN_H_
 
 #include "nebula/base/plugin.h"
-#include "nebula/net/base/config_info.h"
 
 namespace nebula {
 
 class ServicePlugin : public Plugin {
 public:
-  // explicit ServicePlugin(std::shared_ptr<IOThreadPoolConnManager> conns)
-  //  : conns_(conns) {
-  // }
-  
   virtual ~ServicePlugin() = default;
   
-  void Install(const Configuration& conf) override {
+  void Install(const folly::dynamic& conf) override {
     service_info_.SetConf("", conf);
   }
   
 protected:
   ServiceConfig service_info_;
-  // std::shared_ptr<IOThreadPoolConnManager> conns_;
 };
 
 }
