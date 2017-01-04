@@ -32,26 +32,11 @@ struct LogInitializer : public Configurable {
   static void Initialize(const char* argv0);
   
   // 配置改变
-  bool SetConf(const std::string& conf_name, const Configuration& conf) override;
+  bool SetConf(const std::string& conf_name, const folly::dynamic& conf) override;
 };
 
 std::shared_ptr<LogInitializer> GetLogInitializerSingleton();
 
-extern bool GLOG_trace;
-extern bool GLOG_trace_call_chain;
-extern bool GLOG_trace_fiber;
-extern bool GLOG_trace_http;
-extern bool GLOG_trace_message_handler;
-extern bool GLOG_trace_cost;
-    
 }
-
-#define TRACE()                 LOG_IF(INFO, nebula::GLOG_trace)
-#define TRACE_CALL_CHAIN()      LOG_IF(INFO, nebula::GLOG_trace_call_chain)
-#define TRACE_FIBER()           LOG_IF(INFO, nebula::GLOG_trace_fiber)
-#define TRACE_HTTP()            LOG_IF(INFO, nebula::GLOG_trace_http)
-#define TRACE_MESSAGE_HANDLER() LOG_IF(INFO, nebula::GLOG_trace_message_handler)
-#define TRACE_COST()            LOG_IF(INFO, nebula::GLOG_trace_cost)
-
 
 #endif

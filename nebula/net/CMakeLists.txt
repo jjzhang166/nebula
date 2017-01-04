@@ -32,7 +32,6 @@ set (SRC_LIST
   base/service_config.cc
   base/service_config.h
 
-  engine/cluster_manager.h
   engine/tcp_service_base.cc
   engine/tcp_service_base.h
   engine/tcp_server.h
@@ -40,14 +39,8 @@ set (SRC_LIST
   engine/tcp_client_group.h
   engine/tcp_client_pool.h
   engine/tcp_client.h
-  engine/http_client.cc
-  engine/http_client.h
   engine/http_server.cc
   engine/http_server.h
-  engine/simple_tcp_client.cc
-  engine/simple_tcp_client.h
-  engine/simple_conn_handler.cc
-  engine/simple_conn_handler.h
   engine/rpc_server.h
   engine/rpc_client.h
 

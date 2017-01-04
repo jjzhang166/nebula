@@ -22,18 +22,6 @@
 
 namespace nebula {
   
-//////////////////////////////////////////////////////////////////////////////
-// 功能：
-//  1. 消息分发均匀分布，每个连接可分布在不同的线程
-//  2. 可运行时新增和减少连接
-// 实现思路
-//  1. 每连接创建时通过IOThreadPoolExecutor分发到不同的线程里
-//  2. tcp_client_group维护一个连接列表，此列表只新增不删除，一旦删除只是做个删除标记
-//     因为从列表里移除，则除了要同步连接列表以外，还要同步tcp_client内容，锁粒度太大
-// TODO(@benqi):
-//  tcp_client添加状态
-  
-  
 class TcpClientGroupBase : public TcpServiceBase {
 public:
   typedef std::pair<uint64_t, std::weak_ptr<wangle::PipelineBase>> OnlineTcpClient;
@@ -45,13 +33,10 @@ public:
   virtual ~TcpClientGroupBase() = default;
 
   // Impl from TcpConnEventCallback
-  // 内网经常断线的可能性不大，故让tcp_client_group维护一个已经连接列表
   uint64_t OnNewConnection(wangle::PipelineBase* pipeline) override;
   
-  // EventBase线程里执行
   bool OnConnectionClosed(uint64_t conn_id) override;
   
-  // 获取client
   bool GetOnlineClientByRandom(OnlineTcpClient* client) const;
   
   // TODO(@benqi): 暂时未实现
@@ -70,7 +55,6 @@ template<typename Pipeline = DefaultPipeline>
 class TcpClientGroup : public TcpClientGroupBase {
 public:
   typedef std::vector<std::shared_ptr<TcpClient<Pipeline>>> TcpClientList;
-  // typedef std::vector<std::pair<uint64_t, std::weak_ptr<wangle::PipelineBase>> OnlineTcpClientList;
 
   TcpClientGroup(const ServiceConfig& config, const IOThreadPoolExecutorPtr& io_group)
       : TcpClientGroupBase(config, io_group) {}
@@ -83,10 +67,6 @@ public:
   }
 
   bool AddChild(std::shared_ptr<ServiceBase> child) override {
-    // TODO(@benqi)
-    //   检查是否是TcpClient
-    //   检查类型名和服务名是否一样
-    
     std::static_pointer_cast<TcpClient<Pipeline>>(child)->set_group_event_callback(this);
     
     std::lock_guard<std::mutex> g(mutex_);

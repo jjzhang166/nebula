@@ -29,7 +29,6 @@ BaseServer::BaseServer() {
   auto config_manager = ConfigManager::GetInstance();
   
   config_manager->Register("services", &services_config_);
-  config_manager->Register("system", &system_config_);
   config_manager->Register("thread_group", &thread_group_options_);
 }
 

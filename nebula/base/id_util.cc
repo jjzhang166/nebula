@@ -22,7 +22,6 @@ namespace {
   
 uint16_t g_worker_id = 1;
 uint16_t g_data_center_id = 1;
-// uint32_t g_current_ms_id = 0;
   
 }
 

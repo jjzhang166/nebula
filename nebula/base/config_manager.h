@@ -25,13 +25,6 @@
 #include <folly/Singleton.h>
 
 #include "nebula/base/configurable.h"
-#include "nebula/base/configuration.h"
-
-// 配置文件管理器
-// 1. 首先注册配置项
-// 2. 然后加载配置文件
-// TODO(@benqi)，检查配置文件是否修改
-// 3. 检查配置文件是否修改，并通知各配置项
 
 namespace folly {
 class EventBase;
@@ -41,39 +34,37 @@ namespace nebula {
   
 class ConfigManager {
 public:
-    ~ConfigManager() = default;
-
-    // 单件接口
-    static ConfigManager* GetInstance();
-    
-    // 注意：
-    //  item的生命周期
-    void Register(const folly::fbstring& item_name, Configurable* item, bool recv_updated = false);
-    void UnRegister(const folly::fbstring& item_name);
-    
-    bool Initialize(const std::string& config_file);
-    
-    void StartObservingConfigFile(folly::EventBase* evb);
+  ~ConfigManager() = default;
+  
+  // 单件接口
+  static ConfigManager* GetInstance();
+  
+  void Register(const folly::fbstring& item_name, Configurable* item, bool recv_updated = false);
+  void UnRegister(const folly::fbstring& item_name);
+  
+  bool Initialize(const std::string& config_file);
+  
+  void StartObservingConfigFile(folly::EventBase* evb);
   
 private:
-    friend class folly::Singleton<ConfigManager>;
-
-    ConfigManager() = default;
-
-    bool OnConfigFileUpdated();
-    bool OnConfigDataUpdated(const folly::fbstring& config_data, bool is_first);
-    
-    std::string config_file_;
-    
-    struct ConfigurableWithUpdated {
-        Configurable* configurable{nullptr};
-        bool recv_updated{false};              // 是否要接收通知
-    };
-    
-    typedef std::map<folly::fbstring, ConfigurableWithUpdated> ConfigItemMap;
-    ConfigItemMap config_items_;
-    
-    bool is_watched_{false};
+  friend class folly::Singleton<ConfigManager>;
+  
+  ConfigManager() = default;
+  
+  bool OnConfigFileUpdated();
+  bool OnConfigDataUpdated(const folly::fbstring& config_data, bool is_first);
+  
+  std::string config_file_;
+  
+  struct ConfigurableWithUpdated {
+    Configurable* configurable{nullptr};
+    bool recv_updated{false};
+  };
+  
+  typedef std::map<folly::fbstring, ConfigurableWithUpdated> ConfigItemMap;
+  ConfigItemMap config_items_;
+  
+  bool is_watched_{false};
 };
 
 }

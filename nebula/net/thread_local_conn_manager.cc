@@ -23,7 +23,6 @@
 namespace nebula {
   
 ///////////////////////////////////////////////////////////////////////////////////////
-// EventBase线程里执行
 uint64_t ThreadLocalConnManager::OnNewConnection(wangle::PipelineBase* pipeline) {
     uint32_t conn_id = 0;
     bool sucess = false;
@@ -37,9 +36,7 @@ uint64_t ThreadLocalConnManager::OnNewConnection(wangle::PipelineBase* pipeline)
     return static_cast<uint64_t>(thread_id_) << 32 | conn_id;
 }
 
-// EventBase线程里执行
 bool ThreadLocalConnManager::OnConnectionClosed(uint64_t conn_id) {
-    // auto it = pipelines_.find(conn_id & 0xffffffff);
     bool rv = true;
     auto it = pipelines_.find(conn_id & 0xffffffff);
     if (it!=pipelines_.end()) {

@@ -19,7 +19,7 @@
 #define NEBULA_NET_BASE_SERVICE_CONFIG_H_
 
 #include "nebula/base/configurable.h"
-#include "nebula/base/configuration.h"
+#include "nebula/base/reflection_util.h"
 
 namespace nebula {
   
@@ -27,20 +27,20 @@ struct ServiceConfig : public Configurable {
   virtual ~ServiceConfig() = default;
   
   // Override from Configurable
-  bool SetConf(const std::string& conf_name, const Configuration& conf) override;
+  bool SetConf(const std::string& conf_name, const folly::dynamic& conf) override;
   
   std::string ToString() const;
   void PrintDebug() const;
   
-  std::string name;   // 服务名
-  std::string type;   // 服务类型：server/client/redis/db...
-  std::string proto;  // 协议：默认为zproto
-  std::string hosts;  // 主机地址（单台机器使用的多个IP采用‘,’分割）
-  uint32_t    port;   // 端口号
+  std::string name;
+  std::string type;
+  std::string proto;
+  std::string hosts;
+  uint32_t    port;
   
-  // 1. 对于tcp_server/http_server为最大连接数，未设置默认为40960
-  // 2. 对于tcp_client为连接池大小，未设置默认为1
   uint32_t max_conn_cnt {40960};
+  
+  META(name, type, proto, hosts, port, max_conn_cnt);
 };
 
 using ServiceConfigPtr = std::shared_ptr<ServiceConfig>;
@@ -48,9 +48,9 @@ using ServiceConfigPtr = std::shared_ptr<ServiceConfig>;
 struct ServicesConfig : public Configurable {
   virtual ~ServicesConfig() = default;
 
-  static std::vector<std::shared_ptr<ServiceConfig>> ToServiceConfigs(const Configuration& conf);
+  static std::vector<std::shared_ptr<ServiceConfig>> ToServiceConfigs(const folly::dynamic& conf);
 
-  bool SetConf(const std::string& conf_name, const Configuration& conf) override {
+  bool SetConf(const std::string& conf_name, const folly::dynamic& conf) override {
     service_configs = ToServiceConfigs(conf);
     return true;
   }

@@ -25,7 +25,6 @@
 #include <folly/Range.h>
 #include <folly/json.h>
 
-#include "nebula/base/configuration.h"
 #include "nebula/base/config/import_resolver_if.h"
 #include "nebula/base/config/config_preprocessor.h"
 #include "nebula/base/config/file_observer.h"
@@ -36,16 +35,13 @@ const folly::StringKeyedUnorderedMap<folly::dynamic> kConfigGlobalParams{};
 
 class ConfigImportResolver : public ImportResolverIf {
 public:
-    std::string import(folly::StringPiece path) override {
-        // LOG(INFO) << "import - " << path;
-        // 1. 打开文件
-        folly::fbstring json_data;
-        if(!folly::readFile(path.data(), json_data)) {
-            LOG(ERROR) << "import - Unable to open import path << " << path;
-        }
-        // LOG(INFO) << "import - file: " << path << ": " << json_data;
-        return json_data.toStdString();
+  std::string import(folly::StringPiece path) override {
+    folly::fbstring json_data;
+    if(!folly::readFile(path.data(), json_data)) {
+      LOG(ERROR) << "import - Unable to open import path << " << path;
     }
+    return json_data.toStdString();
+  }
 };
 
 }
@@ -53,117 +49,105 @@ public:
 namespace nebula {
   
 ConfigManager* ConfigManager::GetInstance() {
-    static ConfigManager g_config_manager;
-    return &g_config_manager;
-    // return folly::Singleton<ConfigManager>::try_get();
+  static ConfigManager g_config_manager;
+  return &g_config_manager;
 }
 
 void ConfigManager::Register(const folly::fbstring& item_name, Configurable* item, bool recv_updated) {
-    std::cout << "ConfigManager::RegisterConfig - register config_item: " << item_name << std::endl;
-    
-    if (config_items_.find(item_name) != config_items_.end()) {
-        std::cerr << "ConfigManager::RegisterConfig - config_item is registed: " << item_name << std::endl;
-    } else {
-        ConfigurableWithUpdated v;
-        v.configurable = item;
-        v.recv_updated = recv_updated;
-        config_items_.insert(std::make_pair(item_name, v));
-    }
+  std::cout << "ConfigManager::RegisterConfig - register config_item: " << item_name << std::endl;
+  
+  if (config_items_.find(item_name) != config_items_.end()) {
+    std::cerr << "ConfigManager::RegisterConfig - config_item is registed: " << item_name << std::endl;
+  } else {
+    ConfigurableWithUpdated v;
+    v.configurable = item;
+    v.recv_updated = recv_updated;
+    config_items_.insert(std::make_pair(item_name, v));
+  }
 }
 
 void ConfigManager::UnRegister(const folly::fbstring& item_name) {
-    LOG(INFO) << "ConfigManager::UnRegisterConfig - register config_item: " << item_name;
-    
-    ConfigItemMap::iterator it = config_items_.find(item_name);
-    if (it != config_items_.end()) {
-        config_items_.erase(it);
-    }
+  LOG(INFO) << "ConfigManager::UnRegisterConfig - register config_item: " << item_name;
+  
+  ConfigItemMap::iterator it = config_items_.find(item_name);
+  if (it != config_items_.end()) {
+    config_items_.erase(it);
+  }
 }
 
 bool ConfigManager::Initialize(const std::string& config_file) {
-    // LOG(INFO) << "Initialize - initialize config_file: " << config_file;
-    
-    if (!config_file_.empty()) {
-        LOG(ERROR) << "Initialize - config_file is initialized, existed config_file: " << config_file_
-                    << ", will config_file: " << config_file;
-        return false;
-    }
-    
-    config_file_ = config_file;
-    return OnConfigFileUpdated();
+  if (!config_file_.empty()) {
+    LOG(ERROR) << "Initialize - config_file is initialized, existed config_file: " << config_file_
+                << ", will config_file: " << config_file;
+    return false;
+  }
+  
+  config_file_ = config_file;
+  return OnConfigFileUpdated();
 }
 
 bool ConfigManager::OnConfigFileUpdated() {
-    bool rv = false;
-    
-    // 1. 打开文件
-    folly::fbstring config_data;
-    if(!folly::readFile(config_file_.c_str(), config_data)) {
-        LOG(ERROR) << "OnConfigFileUpdated - Unable to open config_file << " << config_file_;
-        return rv;
-    } else {
-        rv = OnConfigDataUpdated(config_data, true);
-    }
-
+  bool rv = false;
+  
+  folly::fbstring config_data;
+  if(!folly::readFile(config_file_.c_str(), config_data)) {
+    LOG(ERROR) << "OnConfigFileUpdated - Unable to open config_file << " << config_file_;
     return rv;
+  } else {
+    rv = OnConfigDataUpdated(config_data, true);
+  }
+  
+  return rv;
 }
 
 bool ConfigManager::OnConfigDataUpdated(const folly::fbstring& config_data, bool is_first) {
-    bool rv = false;
-    // 2. 转为json
-    //
-    ConfigImportResolver resolver;
-    try {
-        auto configs = ConfigPreprocessor::getConfigWithoutMacros(config_data, resolver, kConfigGlobalParams);
-        // configs_.SetDynamicConf(configs);
-        
-        // LOG(INFO) << "OnConfigDataUpdated - configs: " << configs;
-        
-        // 3. 获取每个item，然后通知各个config_item
-        for (auto& it : configs.items()) {
-            auto& key = const_cast<folly::dynamic&>(it.first);
-            auto& value = const_cast<folly::dynamic&>(it.second);
-            
-            ConfigItemMap::iterator it2 = config_items_.find(key.asString());
-            if (it2 != config_items_.end()) {
-                if (it2->second.configurable && (is_first || it2->second.recv_updated)) {
-                    // 规则：
-                    //  1. 是第一次，则全部通知
-                    //  2. 如果配置项有变更指定接收，则通知
-                    Configuration conf(value);
-                    it2->second.configurable->SetConf(it2->first.toStdString(), conf);
-                }
-            } else {
-                LOG(ERROR) << "OnConfigFileUpdated - Unregister config_item: " << key.asString();
-            }
+  bool rv = false;
+  ConfigImportResolver resolver;
+  try {
+    auto configs = ConfigPreprocessor::getConfigWithoutMacros(config_data, resolver, kConfigGlobalParams);
+    for (auto& it : configs.items()) {
+      auto& key = const_cast<folly::dynamic&>(it.first);
+      auto& value = const_cast<folly::dynamic&>(it.second);
+      
+      ConfigItemMap::iterator it2 = config_items_.find(key.asString());
+      if (it2 != config_items_.end()) {
+        if (it2->second.configurable && (is_first || it2->second.recv_updated)) {
+          // 规则：
+          //  1. 是第一次，则全部通知
+          //  2. 如果配置项有变更指定接收，则通知
+          it2->second.configurable->SetConf(it2->first.toStdString(), value);
         }
-        rv = true;
-        
-    } catch (std::exception& e) {
-        LOG(ERROR) << "OnConfigFileUpdated - getConfigWithoutMacros in config_file: " << config_file_
-                    << ", catch a exception: " << e.what();
-    } catch (...) {
-        LOG(ERROR) << "OnConfigFileUpdated - getConfigWithoutMacros in config_file: " << config_file_
-                    << ", catch a invalid exception.";
+      } else {
+        LOG(ERROR) << "OnConfigFileUpdated - Unregister config_item: " << key.asString();
+      }
     }
+    rv = true;
     
-    return rv;
+  } catch (std::exception& e) {
+    LOG(ERROR) << "OnConfigFileUpdated - getConfigWithoutMacros in config_file: " << config_file_
+                << ", catch a exception: " << e.what();
+  } catch (...) {
+    LOG(ERROR) << "OnConfigFileUpdated - getConfigWithoutMacros in config_file: " << config_file_
+                << ", catch a invalid exception.";
+  }
+  
+  return rv;
 }
 
 
 void ConfigManager::StartObservingConfigFile(folly::EventBase* evb) {
-    if(is_watched_)
-        return;
-    
-    startObservingFile(
-                       config_file_,
-                       *evb,
-                       100,
-                       10000,
-                       std::move([this](std::string data) {
-        LOG(INFO) << "ConfigManager - OnConfigDataUpdated, data " << data;
-        OnConfigDataUpdated(data, false);
-    }));
+  if(is_watched_)
+    return;
+  
+  startObservingFile(
+                     config_file_,
+                     *evb,
+                     100,
+                     10000,
+                     std::move([this](std::string data) {
+    LOG(INFO) << "ConfigManager - OnConfigDataUpdated, data " << data;
+    OnConfigDataUpdated(data, false);
+  }));
 }
 
 }

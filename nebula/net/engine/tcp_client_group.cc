@@ -24,8 +24,6 @@
 
 namespace nebula {
 
-// Impl from TcpConnEventCallback
-// 内网经常断线的可能性不大，故让tcp_client_group维护一个已经连接列表
 uint64_t TcpClientGroupBase::OnNewConnection(wangle::PipelineBase* pipeline) {
   auto conn_id = TcpServiceBase::OnNewConnection(pipeline); {
     std::weak_ptr<wangle::PipelineBase> cli(pipeline->shared_from_this());
@@ -36,7 +34,6 @@ uint64_t TcpClientGroupBase::OnNewConnection(wangle::PipelineBase* pipeline) {
   return conn_id;
 }
 
-// EventBase线程里执行
 bool TcpClientGroupBase::OnConnectionClosed(uint64_t conn_id) {
   {
   std::lock_guard<std::mutex> g(online_mutex_);
@@ -51,7 +48,6 @@ bool TcpClientGroupBase::OnConnectionClosed(uint64_t conn_id) {
   return TcpServiceBase::OnConnectionClosed(conn_id);
 }
 
-// 获取client
 bool TcpClientGroupBase::GetOnlineClientByRandom(OnlineTcpClient* client) const {
   bool rv = true;
   

@@ -23,7 +23,6 @@
 
 namespace nebula {
 
-// ClusterManager
 class HttpServer : public ServiceBase {
 public:
   HttpServer(const ServiceConfig& config, const IOThreadPoolExecutorPtr& io_group)

@@ -25,21 +25,12 @@
 #include <folly/Singleton.h>
 #include <folly/FBString.h>
 
-#include "nebula/base/configuration.h"
-
 namespace {
 folly::Singleton<nebula::LogInitializer> g_log_initializer;
 }
 
 namespace nebula {
     
-bool GLOG_trace = true;
-bool GLOG_trace_call_chain = true;
-bool GLOG_trace_fiber = true;
-bool GLOG_trace_http = true;
-bool GLOG_trace_message_handler = true;
-bool GLOG_trace_cost = true;
-
 std::shared_ptr<LogInitializer> GetLogInitializerSingleton() {
   return g_log_initializer.try_get();
 }
@@ -52,35 +43,12 @@ void LogInitializer::Initialize(const char* argv0) {
   // FLAGS_colorlogtostderr = true;
 }
 
-/**
- 配置例子
- "log" = {
-  "fatal_dest" = "./log/log_fatal_",
-  "error_dest" = "./log/log_error_",
-  "warning_dest" = "./log/log_warning_",
-  "info_dest" = "./log/log_info_",
-  "logbufsecs" = 0,
-  "max_log_size" = 1,
-  "stop_logging_if_full_disk" = "true",
-  "enable_folly_debug" = "true",
- }
- */
-
-#define SET_TRACE_FLAG(trace_flag) \
-  v = config_data.get_ptr(#trace_flag); \
-  if (v && v->isBool()) { \
-      nebula::GLOG_##trace_flag = v->asBool(); \
-  }
-
-bool LogInitializer::SetConf(const std::string& conf_name, const Configuration& conf) {
+bool LogInitializer::SetConf(const std::string& conf_name, const folly::dynamic& conf) {
   std::string program_name = google::ProgramInvocationShortName() ?
                              google::ProgramInvocationShortName() : "";
   std::string logger_name;
 
-  folly::dynamic config_data = conf.GetDynamicConf();
-  if (!config_data.isObject()) {
-      return false;
-  }
+  folly::dynamic config_data = conf;
   
   // 设置 google::FATAL 级别的日志存储路径和文件名前缀
   auto fatal_dest = config_data.get_ptr("fatal_dest");
@@ -154,14 +122,6 @@ bool LogInitializer::SetConf(const std::string& conf_name, const Configuration& 
   if (v && v->isBool() && v->asBool()) {
       FLAGS_v = 20;
   }
-
-  SET_TRACE_FLAG(trace);
-  SET_TRACE_FLAG(trace_call_chain);
-  SET_TRACE_FLAG(trace_fiber);
-  SET_TRACE_FLAG(trace_http);
-  SET_TRACE_FLAG(trace_message_handler);
-  SET_TRACE_FLAG(trace_cost);
-
   return true;
 }
 

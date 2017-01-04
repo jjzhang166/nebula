@@ -30,22 +30,6 @@ class IOBuf;
 
 namespace nebula {
   
-// 通过服务类型和服务名创建ServiceBase
-// 服务类型为:
-//   tcp_server
-//   tcp_client
-//   http_server
-// 服务名为每个应用自定义:
-//   比如zhazhad的服务名zhazha_server
-//   通过配置创建ServiceBase
-//   如果未设置服务名，则使用服务类型值为默认服务名：
-//    tcp_server <-> tcp_server
-//    tcp_client <-> tcp_client
-//    udp_server <-> udp_server
-//    udp_client <-> udp_client
-//    http_server <-> http_server
-//    http_client <-> http_client
-
 // 数据转发策略
 enum class DispatchStrategy : int {
   kDefault = 0,           // 默认，使用kRandom
@@ -71,10 +55,6 @@ enum class ServiceModuleType : int {
   
 class ServiceBase;
 
-// 服务基础类
-// 注意：
-//   一个ServiceBase并不和一个ServiceType对应
-//   和ServiceModuleType对应
 class ServiceBase {
 public:
   ServiceBase(const ServiceConfig& config)
@@ -82,13 +62,8 @@ public:
   
   virtual ~ServiceBase() = default;
   
-  // 模块名
-  // ServiceBase有一些中间类型，特别是client
-  // 有n个连接到同一服务不同主机上的tcp_client，我们会将这些连接分组到tcp_client_group
-  // 同一主机上的同一服务我们也可能发起多个连接，我们会将这些连接分组到tcp_client_pool
   virtual ServiceModuleType GetModuleType() const = 0;
   
-  // 服务配置信息
   inline const ServiceConfig& GetServiceConfig() const {
     return config_;
   }
@@ -106,18 +81,12 @@ public:
   virtual bool Pause() { return false; }
   virtual bool Stop() { return false; }
   
-  // TcpClientGroup或TcpClientPool使用
   virtual bool AddChild(std::shared_ptr<ServiceBase> service) { return false; }
-  
-  // TODO(@benqi): 实现RemoveChild
-  // virtual void RemoveChild(ServiceBase* service) {}
   
 protected:
   ServiceConfig config_;
 };
   
-// using ServiceSelfRegisterTemplate = ServiceSelfRegisterFactoryManager::RegisterTemplate<>;
-
 using ServiceBasePtr = std::shared_ptr<ServiceBase>;
 
 using NewServiceBaseFunc = std::function<

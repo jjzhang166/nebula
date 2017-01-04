@@ -18,27 +18,27 @@
 #include "nebula/net/base/service_config.h"
 
 #include <iostream>
+#include "nebula/base/json/json.h"
 
 namespace nebula {
   
 // Override from Configurable
-bool ServiceConfig::SetConf(const std::string& conf_name, const Configuration& conf) {
+bool ServiceConfig::SetConf(const std::string& conf_name, const folly::dynamic& conf) {
   folly::dynamic v = nullptr;
-  std::cout << conf.GetDynamicConf() << std::endl;
-  v = conf.GetValue("name");
+  v = Configurable::GetConfigValue(conf, "name");
   if (v.isString()) name = v.asString();
-  v = conf.GetValue("type");
+  v = Configurable::GetConfigValue(conf, "type");
   if (v.isString()) type = v.asString();
-  v = conf.GetValue("proto");
+  v = Configurable::GetConfigValue(conf, "proto");
   if (v.isString()) proto = v.asString();
-  v = conf.GetValue("hosts");
+  v = Configurable::GetConfigValue(conf, "hosts");
   if (v.isString()) hosts = v.asString();
-  v = conf.GetValue("port");
+  v = Configurable::GetConfigValue(conf, "port");
   if (v.isInt()) port = static_cast<uint32_t>(v.asInt());
   
-  v = conf.GetValue("max_conn_cnt");
+  v = Configurable::GetConfigValue(conf, "max_conn_cnt");
   if (v.isInt()) max_conn_cnt = static_cast<uint32_t>(v.asInt());
-  
+
   return true;
 }
 
@@ -61,13 +61,12 @@ void ServiceConfig::PrintDebug() const {
             << std::endl;
 }
 
-std::vector<std::shared_ptr<ServiceConfig>> ServicesConfig::ToServiceConfigs(const Configuration& conf) {
+std::vector<std::shared_ptr<ServiceConfig>> ServicesConfig::ToServiceConfigs(const folly::dynamic& conf) {
   std::vector<std::shared_ptr<ServiceConfig>> v;
   
-  for (auto& v2 : conf.GetDynamicConf()) {
+  for (auto& v2 : conf) {
     auto config_info = std::make_shared<ServiceConfig>();
-    Configuration config(v2);
-    config_info->SetConf("", config);
+    config_info->SetConf("", v2);
     v.push_back(config_info);
   }
   

@@ -20,13 +20,7 @@
 #include <glog/logging.h>
 #include <folly/MoveWrapper.h>
 
-// #include "nebula/net/base/service_factory_manager.h"
 #include "nebula/net/thread_local_conn_manager.h"
-
-//#include "nebula/net/server/tcp_client_group.h"
-//#include "nebula/net/server/tcp_server.h"
-//
-//#include "nebula/net/rpc_conn_manager.h"
 
 namespace nebula {
   
