@@ -18,7 +18,7 @@
 #include "nebula/storage/mysql/mysql_database.h"
 
 #include <iostream>
-#include <mysqld_error.h>
+#include <mysql/mysqld_error.h>
 
 #include <folly/Format.h>
 #include <folly/Conv.h>

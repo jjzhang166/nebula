@@ -24,7 +24,7 @@
 #include <winsock2.h>
 #endif
 
-#include <mysql.h>
+#include <mysql/mysql.h>
 
 namespace db {
   

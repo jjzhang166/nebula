@@ -36,14 +36,16 @@ find_library(GFLAGS_LIBRARY_PATH gflags)
 find_package(Folly REQUIRED)
 find_package(Wangle REQUIRED)
 find_package(Proxygen REQUIRED COMPONENTS proxygenhttpserver proxygenlib)
+find_package(MySQL REQUIRED)
 
 include_directories(
 ${CMAKE_SOURCE_DIR}
 ${BOOST_INCLUDE_DIR}
-${OPENSSL_INCLUDE_DIR}
 ${FOLLY_INCLUDE_DIR}
 ${WANGLE_INCLUDE_DIR}
 ${PROXYGEN_INCLUDE_DIR}
+${MYSQL_INCLUDE_DIR}
+${OPENSSL_INCLUDE_DIR}
 ${INCLUDE_DIR}
 )
 
@@ -52,16 +54,16 @@ ${INCLUDE_DIR}
 message("Folly lib: " ${FOLLY_LIBRARY})
 message("Wangle lib: " ${WANGLE_LIBRARY})
 message("Proxygen lib: " ${PROXYGEN_LIBRARY})
+message("MySQL lib: " ${MYSQL_LIBRARY})
 
 link_directories(
-/usr/local/lib
-/usr/local/mysql/lib
-#${FOLLY_LIBRARYDIR}
-#${WANGLE_LIBRARYDIR}
+${FOLLY_LIBRARYDIR}
+${WANGLE_LIBRARYDIR}
 ${PROXYGEN_LIBRARYDIR}
-#${OPENSSL_LIBRARYDIR}
-#${BOOST_LIBRARYDIR}
-#${PROJECT_BINARY_DIR}/lib
+${BOOST_LIBRARYDIR}
+${MYSQL_LIBRARYDIR}
+${OPENSSL_LIBRARIESDIR}
+${PROJECT_BINARY_DIR}/lib
 )
 
 #set(CMAKE_EXE_LINKER_FLAGS "-lpthread -lrt -ldl")

@@ -48,14 +48,13 @@ void protobuf_AssignDesc_zrpc_5ftest_2eproto() {
   ZRpcTestReq_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ZRpcTestReq_descriptor_,
-      ZRpcTestReq::default_instance_,
+      ZRpcTestReq::internal_default_instance(),
       ZRpcTestReq_offsets_,
       -1,
       -1,
       -1,
       sizeof(ZRpcTestReq),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestReq, _internal_metadata_),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestReq, _is_default_instance_));
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestReq, _internal_metadata_));
   ZRpcTestRsp_descriptor_ = file->message_type(1);
   static const int ZRpcTestRsp_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestRsp, rsp_data_),
@@ -63,14 +62,13 @@ void protobuf_AssignDesc_zrpc_5ftest_2eproto() {
   ZRpcTestRsp_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ZRpcTestRsp_descriptor_,
-      ZRpcTestRsp::default_instance_,
+      ZRpcTestRsp::internal_default_instance(),
       ZRpcTestRsp_offsets_,
       -1,
       -1,
       -1,
       sizeof(ZRpcTestRsp),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestRsp, _internal_metadata_),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestRsp, _is_default_instance_));
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestRsp, _internal_metadata_));
   ZRpcTestPush_descriptor_ = file->message_type(2);
   static const int ZRpcTestPush_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestPush, push_data_),
@@ -78,20 +76,19 @@ void protobuf_AssignDesc_zrpc_5ftest_2eproto() {
   ZRpcTestPush_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ZRpcTestPush_descriptor_,
-      ZRpcTestPush::default_instance_,
+      ZRpcTestPush::internal_default_instance(),
       ZRpcTestPush_offsets_,
       -1,
       -1,
       -1,
       sizeof(ZRpcTestPush),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestPush, _internal_metadata_),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestPush, _is_default_instance_));
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ZRpcTestPush, _internal_metadata_));
 }
 
 namespace {
 
 GOOGLE_PROTOBUF_DECLARE_ONCE(protobuf_AssignDescriptors_once_);
-inline void protobuf_AssignDescriptorsOnce() {
+void protobuf_AssignDescriptorsOnce() {
   ::google::protobuf::GoogleOnceInit(&protobuf_AssignDescriptors_once_,
                  &protobuf_AssignDesc_zrpc_5ftest_2eproto);
 }
@@ -100,31 +97,47 @@ void protobuf_RegisterTypes(const ::std::string&) GOOGLE_ATTRIBUTE_COLD;
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-      ZRpcTestReq_descriptor_, &ZRpcTestReq::default_instance());
+      ZRpcTestReq_descriptor_, ZRpcTestReq::internal_default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-      ZRpcTestRsp_descriptor_, &ZRpcTestRsp::default_instance());
+      ZRpcTestRsp_descriptor_, ZRpcTestRsp::internal_default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-      ZRpcTestPush_descriptor_, &ZRpcTestPush::default_instance());
+      ZRpcTestPush_descriptor_, ZRpcTestPush::internal_default_instance());
 }
 
 }  // namespace
 
 void protobuf_ShutdownFile_zrpc_5ftest_2eproto() {
-  delete ZRpcTestReq::default_instance_;
+  ZRpcTestReq_default_instance_.Shutdown();
   delete ZRpcTestReq_reflection_;
-  delete ZRpcTestRsp::default_instance_;
+  ZRpcTestRsp_default_instance_.Shutdown();
   delete ZRpcTestRsp_reflection_;
-  delete ZRpcTestPush::default_instance_;
+  ZRpcTestPush_default_instance_.Shutdown();
   delete ZRpcTestPush_reflection_;
 }
 
-void protobuf_AddDesc_zrpc_5ftest_2eproto() GOOGLE_ATTRIBUTE_COLD;
-void protobuf_AddDesc_zrpc_5ftest_2eproto() {
-  static bool already_here = false;
-  if (already_here) return;
-  already_here = true;
+void protobuf_InitDefaults_zrpc_5ftest_2eproto_impl() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
+  ::google::protobuf::internal::GetEmptyString();
+  ZRpcTestReq_default_instance_.DefaultConstruct();
+  ::google::protobuf::internal::GetEmptyString();
+  ZRpcTestRsp_default_instance_.DefaultConstruct();
+  ::google::protobuf::internal::GetEmptyString();
+  ZRpcTestPush_default_instance_.DefaultConstruct();
+  ZRpcTestReq_default_instance_.get_mutable()->InitAsDefaultInstance();
+  ZRpcTestRsp_default_instance_.get_mutable()->InitAsDefaultInstance();
+  ZRpcTestPush_default_instance_.get_mutable()->InitAsDefaultInstance();
+}
+
+GOOGLE_PROTOBUF_DECLARE_ONCE(protobuf_InitDefaults_zrpc_5ftest_2eproto_once_);
+void protobuf_InitDefaults_zrpc_5ftest_2eproto() {
+  ::google::protobuf::GoogleOnceInit(&protobuf_InitDefaults_zrpc_5ftest_2eproto_once_,
+                 &protobuf_InitDefaults_zrpc_5ftest_2eproto_impl);
+}
+void protobuf_AddDesc_zrpc_5ftest_2eproto_impl() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  protobuf_InitDefaults_zrpc_5ftest_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\017zrpc_test.proto\022\006zproto\"\035\n\013ZRpcTestReq"
     "\022\016\n\006req_id\030\001 \001(\t\"\037\n\013ZRpcTestRsp\022\020\n\010rsp_d"
@@ -133,15 +146,14 @@ void protobuf_AddDesc_zrpc_5ftest_2eproto() {
     "\002b\006proto3", 169);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "zrpc_test.proto", &protobuf_RegisterTypes);
-  ZRpcTestReq::default_instance_ = new ZRpcTestReq();
-  ZRpcTestRsp::default_instance_ = new ZRpcTestRsp();
-  ZRpcTestPush::default_instance_ = new ZRpcTestPush();
-  ZRpcTestReq::default_instance_->InitAsDefaultInstance();
-  ZRpcTestRsp::default_instance_->InitAsDefaultInstance();
-  ZRpcTestPush::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_zrpc_5ftest_2eproto);
 }
 
+GOOGLE_PROTOBUF_DECLARE_ONCE(protobuf_AddDesc_zrpc_5ftest_2eproto_once_);
+void protobuf_AddDesc_zrpc_5ftest_2eproto() {
+  ::google::protobuf::GoogleOnceInit(&protobuf_AddDesc_zrpc_5ftest_2eproto_once_,
+                 &protobuf_AddDesc_zrpc_5ftest_2eproto_impl);
+}
 // Force AddDescriptors() to be called at static initialization time.
 struct StaticDescriptorInitializer_zrpc_5ftest_2eproto {
   StaticDescriptorInitializer_zrpc_5ftest_2eproto() {
@@ -157,27 +169,25 @@ const int ZRpcTestReq::kReqIdFieldNumber;
 
 ZRpcTestReq::ZRpcTestReq()
   : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  if (this != internal_default_instance()) protobuf_InitDefaults_zrpc_5ftest_2eproto();
   SharedCtor();
   // @@protoc_insertion_point(constructor:zproto.ZRpcTestReq)
 }
 
 void ZRpcTestReq::InitAsDefaultInstance() {
-  _is_default_instance_ = true;
 }
 
 ZRpcTestReq::ZRpcTestReq(const ZRpcTestReq& from)
   : ::google::protobuf::Message(),
     _internal_metadata_(NULL) {
   SharedCtor();
-  MergeFrom(from);
+  UnsafeMergeFrom(from);
   // @@protoc_insertion_point(copy_constructor:zproto.ZRpcTestReq)
 }
 
 void ZRpcTestReq::SharedCtor() {
-    _is_default_instance_ = false;
-  ::google::protobuf::internal::GetEmptyString();
-  _cached_size_ = 0;
   req_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  _cached_size_ = 0;
 }
 
 ZRpcTestReq::~ZRpcTestReq() {
@@ -187,8 +197,6 @@ ZRpcTestReq::~ZRpcTestReq() {
 
 void ZRpcTestReq::SharedDtor() {
   req_id_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (this != default_instance_) {
-  }
 }
 
 void ZRpcTestReq::SetCachedSize(int size) const {
@@ -202,11 +210,11 @@ const ::google::protobuf::Descriptor* ZRpcTestReq::descriptor() {
 }
 
 const ZRpcTestReq& ZRpcTestReq::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_zrpc_5ftest_2eproto();
-  return *default_instance_;
+  protobuf_InitDefaults_zrpc_5ftest_2eproto();
+  return *internal_default_instance();
 }
 
-ZRpcTestReq* ZRpcTestReq::default_instance_ = NULL;
+::google::protobuf::internal::ExplicitlyConstructed<ZRpcTestReq> ZRpcTestReq_default_instance_;
 
 ZRpcTestReq* ZRpcTestReq::New(::google::protobuf::Arena* arena) const {
   ZRpcTestReq* n = new ZRpcTestReq;
@@ -216,6 +224,9 @@ ZRpcTestReq* ZRpcTestReq::New(::google::protobuf::Arena* arena) const {
   return n;
 }
 
+void ZRpcTestReq::UnsafeMergeFrom(const ZRpcTestReq& from) {
+  MergeFrom(from);
+}
 void ZRpcTestReq::Swap(ZRpcTestReq* other) {
   if (other == this) return;
   InternalSwap(other);
@@ -238,37 +249,37 @@ void ZRpcTestReq::InternalSwap(ZRpcTestReq* other) {
 void ZRpcTestReq::clear_req_id() {
   req_id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- const ::std::string& ZRpcTestReq::req_id() const {
+const ::std::string& ZRpcTestReq::req_id() const {
   // @@protoc_insertion_point(field_get:zproto.ZRpcTestReq.req_id)
   return req_id_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestReq::set_req_id(const ::std::string& value) {
+void ZRpcTestReq::set_req_id(const ::std::string& value) {
   
   req_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
   // @@protoc_insertion_point(field_set:zproto.ZRpcTestReq.req_id)
 }
- void ZRpcTestReq::set_req_id(const char* value) {
+void ZRpcTestReq::set_req_id(const char* value) {
   
   req_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:zproto.ZRpcTestReq.req_id)
 }
- void ZRpcTestReq::set_req_id(const char* value, size_t size) {
+void ZRpcTestReq::set_req_id(const char* value, size_t size) {
   
   req_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
   // @@protoc_insertion_point(field_set_pointer:zproto.ZRpcTestReq.req_id)
 }
- ::std::string* ZRpcTestReq::mutable_req_id() {
+::std::string* ZRpcTestReq::mutable_req_id() {
   
   // @@protoc_insertion_point(field_mutable:zproto.ZRpcTestReq.req_id)
   return req_id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- ::std::string* ZRpcTestReq::release_req_id() {
+::std::string* ZRpcTestReq::release_req_id() {
   // @@protoc_insertion_point(field_release:zproto.ZRpcTestReq.req_id)
   
   return req_id_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestReq::set_allocated_req_id(::std::string* req_id) {
+void ZRpcTestReq::set_allocated_req_id(::std::string* req_id) {
   if (req_id != NULL) {
     
   } else {
@@ -278,6 +289,9 @@ void ZRpcTestReq::clear_req_id() {
   // @@protoc_insertion_point(field_set_allocated:zproto.ZRpcTestReq.req_id)
 }
 
+inline const ZRpcTestReq* ZRpcTestReq::internal_default_instance() {
+  return &ZRpcTestReq_default_instance_.get();
+}
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
@@ -288,27 +302,25 @@ const int ZRpcTestRsp::kRspDataFieldNumber;
 
 ZRpcTestRsp::ZRpcTestRsp()
   : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  if (this != internal_default_instance()) protobuf_InitDefaults_zrpc_5ftest_2eproto();
   SharedCtor();
   // @@protoc_insertion_point(constructor:zproto.ZRpcTestRsp)
 }
 
 void ZRpcTestRsp::InitAsDefaultInstance() {
-  _is_default_instance_ = true;
 }
 
 ZRpcTestRsp::ZRpcTestRsp(const ZRpcTestRsp& from)
   : ::google::protobuf::Message(),
     _internal_metadata_(NULL) {
   SharedCtor();
-  MergeFrom(from);
+  UnsafeMergeFrom(from);
   // @@protoc_insertion_point(copy_constructor:zproto.ZRpcTestRsp)
 }
 
 void ZRpcTestRsp::SharedCtor() {
-    _is_default_instance_ = false;
-  ::google::protobuf::internal::GetEmptyString();
-  _cached_size_ = 0;
   rsp_data_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  _cached_size_ = 0;
 }
 
 ZRpcTestRsp::~ZRpcTestRsp() {
@@ -318,8 +330,6 @@ ZRpcTestRsp::~ZRpcTestRsp() {
 
 void ZRpcTestRsp::SharedDtor() {
   rsp_data_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (this != default_instance_) {
-  }
 }
 
 void ZRpcTestRsp::SetCachedSize(int size) const {
@@ -333,11 +343,11 @@ const ::google::protobuf::Descriptor* ZRpcTestRsp::descriptor() {
 }
 
 const ZRpcTestRsp& ZRpcTestRsp::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_zrpc_5ftest_2eproto();
-  return *default_instance_;
+  protobuf_InitDefaults_zrpc_5ftest_2eproto();
+  return *internal_default_instance();
 }
 
-ZRpcTestRsp* ZRpcTestRsp::default_instance_ = NULL;
+::google::protobuf::internal::ExplicitlyConstructed<ZRpcTestRsp> ZRpcTestRsp_default_instance_;
 
 ZRpcTestRsp* ZRpcTestRsp::New(::google::protobuf::Arena* arena) const {
   ZRpcTestRsp* n = new ZRpcTestRsp;
@@ -347,6 +357,9 @@ ZRpcTestRsp* ZRpcTestRsp::New(::google::protobuf::Arena* arena) const {
   return n;
 }
 
+void ZRpcTestRsp::UnsafeMergeFrom(const ZRpcTestRsp& from) {
+  MergeFrom(from);
+}
 void ZRpcTestRsp::Swap(ZRpcTestRsp* other) {
   if (other == this) return;
   InternalSwap(other);
@@ -369,37 +382,37 @@ void ZRpcTestRsp::InternalSwap(ZRpcTestRsp* other) {
 void ZRpcTestRsp::clear_rsp_data() {
   rsp_data_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- const ::std::string& ZRpcTestRsp::rsp_data() const {
+const ::std::string& ZRpcTestRsp::rsp_data() const {
   // @@protoc_insertion_point(field_get:zproto.ZRpcTestRsp.rsp_data)
   return rsp_data_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestRsp::set_rsp_data(const ::std::string& value) {
+void ZRpcTestRsp::set_rsp_data(const ::std::string& value) {
   
   rsp_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
   // @@protoc_insertion_point(field_set:zproto.ZRpcTestRsp.rsp_data)
 }
- void ZRpcTestRsp::set_rsp_data(const char* value) {
+void ZRpcTestRsp::set_rsp_data(const char* value) {
   
   rsp_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:zproto.ZRpcTestRsp.rsp_data)
 }
- void ZRpcTestRsp::set_rsp_data(const char* value, size_t size) {
+void ZRpcTestRsp::set_rsp_data(const char* value, size_t size) {
   
   rsp_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
   // @@protoc_insertion_point(field_set_pointer:zproto.ZRpcTestRsp.rsp_data)
 }
- ::std::string* ZRpcTestRsp::mutable_rsp_data() {
+::std::string* ZRpcTestRsp::mutable_rsp_data() {
   
   // @@protoc_insertion_point(field_mutable:zproto.ZRpcTestRsp.rsp_data)
   return rsp_data_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- ::std::string* ZRpcTestRsp::release_rsp_data() {
+::std::string* ZRpcTestRsp::release_rsp_data() {
   // @@protoc_insertion_point(field_release:zproto.ZRpcTestRsp.rsp_data)
   
   return rsp_data_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestRsp::set_allocated_rsp_data(::std::string* rsp_data) {
+void ZRpcTestRsp::set_allocated_rsp_data(::std::string* rsp_data) {
   if (rsp_data != NULL) {
     
   } else {
@@ -409,6 +422,9 @@ void ZRpcTestRsp::clear_rsp_data() {
   // @@protoc_insertion_point(field_set_allocated:zproto.ZRpcTestRsp.rsp_data)
 }
 
+inline const ZRpcTestRsp* ZRpcTestRsp::internal_default_instance() {
+  return &ZRpcTestRsp_default_instance_.get();
+}
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
@@ -419,27 +435,25 @@ const int ZRpcTestPush::kPushDataFieldNumber;
 
 ZRpcTestPush::ZRpcTestPush()
   : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  if (this != internal_default_instance()) protobuf_InitDefaults_zrpc_5ftest_2eproto();
   SharedCtor();
   // @@protoc_insertion_point(constructor:zproto.ZRpcTestPush)
 }
 
 void ZRpcTestPush::InitAsDefaultInstance() {
-  _is_default_instance_ = true;
 }
 
 ZRpcTestPush::ZRpcTestPush(const ZRpcTestPush& from)
   : ::google::protobuf::Message(),
     _internal_metadata_(NULL) {
   SharedCtor();
-  MergeFrom(from);
+  UnsafeMergeFrom(from);
   // @@protoc_insertion_point(copy_constructor:zproto.ZRpcTestPush)
 }
 
 void ZRpcTestPush::SharedCtor() {
-    _is_default_instance_ = false;
-  ::google::protobuf::internal::GetEmptyString();
-  _cached_size_ = 0;
   push_data_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  _cached_size_ = 0;
 }
 
 ZRpcTestPush::~ZRpcTestPush() {
@@ -449,8 +463,6 @@ ZRpcTestPush::~ZRpcTestPush() {
 
 void ZRpcTestPush::SharedDtor() {
   push_data_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (this != default_instance_) {
-  }
 }
 
 void ZRpcTestPush::SetCachedSize(int size) const {
@@ -464,11 +476,11 @@ const ::google::protobuf::Descriptor* ZRpcTestPush::descriptor() {
 }
 
 const ZRpcTestPush& ZRpcTestPush::default_instance() {
-  if (default_instance_ == NULL) protobuf_AddDesc_zrpc_5ftest_2eproto();
-  return *default_instance_;
+  protobuf_InitDefaults_zrpc_5ftest_2eproto();
+  return *internal_default_instance();
 }
 
-ZRpcTestPush* ZRpcTestPush::default_instance_ = NULL;
+::google::protobuf::internal::ExplicitlyConstructed<ZRpcTestPush> ZRpcTestPush_default_instance_;
 
 ZRpcTestPush* ZRpcTestPush::New(::google::protobuf::Arena* arena) const {
   ZRpcTestPush* n = new ZRpcTestPush;
@@ -478,6 +490,9 @@ ZRpcTestPush* ZRpcTestPush::New(::google::protobuf::Arena* arena) const {
   return n;
 }
 
+void ZRpcTestPush::UnsafeMergeFrom(const ZRpcTestPush& from) {
+  MergeFrom(from);
+}
 void ZRpcTestPush::Swap(ZRpcTestPush* other) {
   if (other == this) return;
   InternalSwap(other);
@@ -500,37 +515,37 @@ void ZRpcTestPush::InternalSwap(ZRpcTestPush* other) {
 void ZRpcTestPush::clear_push_data() {
   push_data_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- const ::std::string& ZRpcTestPush::push_data() const {
+const ::std::string& ZRpcTestPush::push_data() const {
   // @@protoc_insertion_point(field_get:zproto.ZRpcTestPush.push_data)
   return push_data_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestPush::set_push_data(const ::std::string& value) {
+void ZRpcTestPush::set_push_data(const ::std::string& value) {
   
   push_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
   // @@protoc_insertion_point(field_set:zproto.ZRpcTestPush.push_data)
 }
- void ZRpcTestPush::set_push_data(const char* value) {
+void ZRpcTestPush::set_push_data(const char* value) {
   
   push_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:zproto.ZRpcTestPush.push_data)
 }
- void ZRpcTestPush::set_push_data(const char* value, size_t size) {
+void ZRpcTestPush::set_push_data(const char* value, size_t size) {
   
   push_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
   // @@protoc_insertion_point(field_set_pointer:zproto.ZRpcTestPush.push_data)
 }
- ::std::string* ZRpcTestPush::mutable_push_data() {
+::std::string* ZRpcTestPush::mutable_push_data() {
   
   // @@protoc_insertion_point(field_mutable:zproto.ZRpcTestPush.push_data)
   return push_data_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- ::std::string* ZRpcTestPush::release_push_data() {
+::std::string* ZRpcTestPush::release_push_data() {
   // @@protoc_insertion_point(field_release:zproto.ZRpcTestPush.push_data)
   
   return push_data_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
- void ZRpcTestPush::set_allocated_push_data(::std::string* push_data) {
+void ZRpcTestPush::set_allocated_push_data(::std::string* push_data) {
   if (push_data != NULL) {
     
   } else {
@@ -540,6 +555,9 @@ void ZRpcTestPush::clear_push_data() {
   // @@protoc_insertion_point(field_set_allocated:zproto.ZRpcTestPush.push_data)
 }
 
+inline const ZRpcTestPush* ZRpcTestPush::internal_default_instance() {
+  return &ZRpcTestPush_default_instance_.get();
+}
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)

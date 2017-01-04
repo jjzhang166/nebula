@@ -14,13 +14,12 @@
 # limitations under the License.
 #
 
-include_directories(/usr/local/mysql/include/ /usr/local/include ../)
+include_directories(../)
 
 set (SRC_LIST
 zorm_template.cc
 zorm_template.h
 )
-
 
 add_executable (zorm ${SRC_LIST})
 target_link_libraries (zorm storage base)
