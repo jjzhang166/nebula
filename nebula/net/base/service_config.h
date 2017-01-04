@@ -33,7 +33,7 @@ struct ServiceConfig : public Configurable {
   void PrintDebug() const;
   
   std::string name;   // 服务名
-  std::string type;   // 服务类型：server/client/redis/db...
+  std::string type;   // 服务类型
   std::string proto;  // 协议：默认为zproto
   std::string hosts;  // 主机地址（单台机器使用的多个IP采用‘,’分割）
   uint32_t    port;   // 端口号

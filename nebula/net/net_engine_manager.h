@@ -31,15 +31,6 @@
 namespace nebula {
   
 //////////////////////////////////////////////////////////////////////////////
-// 集群路由管理器，管理网络分发等
-// 整个基础库里最重要的类
-// tcp_server为单个
-// tcp_client属于一个组
-// TODO(@benqi)
-//  配置文件还是不太合理
-//  对所有的tcp_client，应该配置在一个分组里
-// 单件
-
 class NetEngineManager {
 public :
   ~NetEngineManager() = default;

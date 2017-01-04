@@ -38,15 +38,6 @@
 namespace nebula {
 
 /////////////////////////////////////////////////////////////////////////////
-// 线程描述:
-//  线程类型
-//  线程ID
-// accept(独立)
-// client(独立)
-// conn(accept/clinent混合), 先检查conn, 如果conn设置则accept和client失效
-// fiber
-// db
-// redis
 enum class ThreadType : int {
   NORMAL = 1,         // 普通线程
   CONN_ACCEPT = 2,    // Accept, 需要EventBase支持
@@ -101,13 +92,6 @@ struct ThreadInfo {
 class ThreadGroup;
 typedef std::function<size_t(ThreadGroup*, wangle::ThreadPoolExecutor::ThreadHandle*)> NewThreadDataCallback;
     
-// class ThreadGroup;
-//
-// 需求:
-// IOThread（Accept/Client/Accept_Clinet）支持thread_id
-// IOThreadPoolExceutor
-// CPUThreadPoolExecutor
-// 网络IO(IOThreadConnManager)
 class ThreadGroup {
 public:
   //////////////////////////////////////////////////////////////////////////////////////////
@@ -164,32 +148,6 @@ struct ThreadData {
   folly::EventBase* evb {nullptr};          // evb
 };
 
-
-// 线程管理器
-// IOThreadConnManager
-// CPUThreadManager
-//
-// ThreadPoolExecutor
-// 1: 单线程（ACCEPT和CONN都使用一个线程）
-// 0: 4个线程（连接），其它的多线程
-// 未指定
-//
-//
-//std::shared_ptr<wangle::ThreadPoolExecutor> MakeThreadGroup(ThreadType thread_type, int thread_size) {
-//}
-
-    
-// thread_pool配置
-/**
- "thread_pool" : {
-    "accept" : 0,
-    "client" : 4,
-    "conn"   : 4,
-    "fiber"  : 4,
-    "db"     : 4,
-    "redis"  : 4
- }
- */
 // 初始化线程列表
 struct ThreadGroupListOption : public Configurable {
     

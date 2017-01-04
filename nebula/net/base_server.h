@@ -21,7 +21,6 @@
 #include <list>
 
 #include "nebula/base/base_daemon.h"
-#include "nebula/base/config_util.h"
 #include "nebula/base/configuration.h"
 
 #include "nebula/net/base/service_base.h"
@@ -51,7 +50,6 @@ protected:
   
   // std::map<uint64_t, uint32_t> connected_server_map_;
   ServicesConfig services_config_;
-  SystemConfig system_config_;
   
   ThreadGroupListOption thread_group_options_;
   

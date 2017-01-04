@@ -27,12 +27,8 @@ set (SRC_LIST
   configurable.h
   configuration.cc
   configuration.h
-  config_util.cc
-  config_util.h
   plugin.h
   timer_manager.h
-  cluster_node_manager.cc
-  cluster_node_manager.h
   id_util.cc
   id_util.h
   config_manager.cc
@@ -46,10 +42,6 @@ set (SRC_LIST
   config/file_observer.h
   config/file_data_provider.cc
   config/file_data_provider.h
-  gperftools_profiler.cc
-  gperftools_profiler.h
-  process_util.cc
-  process_util.h
   linked_hash_map.h
   linked_map.h
   iterator.h
