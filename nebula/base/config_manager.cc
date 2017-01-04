@@ -25,7 +25,6 @@
 #include <folly/Range.h>
 #include <folly/json.h>
 
-#include "nebula/base/configuration.h"
 #include "nebula/base/config/import_resolver_if.h"
 #include "nebula/base/config/config_preprocessor.h"
 #include "nebula/base/config/file_observer.h"
@@ -116,8 +115,7 @@ bool ConfigManager::OnConfigDataUpdated(const folly::fbstring& config_data, bool
           // 规则：
           //  1. 是第一次，则全部通知
           //  2. 如果配置项有变更指定接收，则通知
-          Configuration conf(value);
-          it2->second.configurable->SetConf(it2->first.toStdString(), conf);
+          it2->second.configurable->SetConf(it2->first.toStdString(), value);
         }
       } else {
         LOG(ERROR) << "OnConfigFileUpdated - Unregister config_item: " << key.asString();

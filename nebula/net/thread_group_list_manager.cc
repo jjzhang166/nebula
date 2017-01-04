@@ -20,7 +20,6 @@
 #include <wangle/concurrent/IOThreadPoolExecutor.h>
 #include <wangle/concurrent/CPUThreadPoolExecutor.h>
 
-#include "nebula/base/configuration.h"
 #include "nebula/base/logger/glog_util.h"
 #include "nebula/net/thread_local_conn_manager.h"
 
@@ -54,43 +53,42 @@ void ThreadGroup::ThreadGroupObserver::threadStopped(wangle::ThreadPoolExecutor:
   }
 }
 
-bool ThreadGroupListOption::SetConf(const std::string &conf_name, const Configuration &conf) {
-  folly::dynamic config_data = conf.GetDynamicConf();
-  if (!config_data.isObject()) {
-    LOG(ERROR) << "SetConf - config error, conf_name: " << conf_name << ", data: " << config_data;
+bool ThreadGroupListOption::SetConf(const std::string &conf_name, const folly::dynamic& conf) {
+  if (!conf.isObject()) {
+    LOG(ERROR) << "SetConf - config error, conf_name: " << conf_name << ", data: " << conf;
     return false;
   }
   
   // bool is_conn = false, is_accept = false, is_client = false;
-  auto conn = config_data.get_ptr("conn");
+  auto conn = conf.get_ptr("conn");
   if (conn && conn->isInt()) {
     options.emplace_back(ThreadType::CONN, static_cast<int>(conn->asInt()));
     // is_conn = true;
   } else {
-    auto accept = config_data.get_ptr("accept");
+    auto accept = conf.get_ptr("accept");
     if (accept && accept->isInt()) {
       options.emplace_back(ThreadType::CONN_ACCEPT, static_cast<int>(accept->asInt()));
       // is_accept = true;
     }
     
-    auto client = config_data.get_ptr("client");
+    auto client = conf.get_ptr("client");
     if (client && client->isInt()) {
       options.emplace_back(ThreadType::CONN_CLIENT, static_cast<int>(client->asInt()));
       // is_client = true;
     }
   }
   
-  auto fiber = config_data.get_ptr("fiber");
+  auto fiber = conf.get_ptr("fiber");
   if (fiber && fiber->isInt()) {
     options.emplace_back(ThreadType::FIBER, static_cast<int>(fiber->asInt()));
   }
   
-  auto db = config_data.get_ptr("db");
+  auto db = conf.get_ptr("db");
   if (db && db->isInt()) {
     options.emplace_back(ThreadType::DB, static_cast<int>(db->asInt()));
   }
   
-  auto redis = config_data.get_ptr("redis");
+  auto redis = conf.get_ptr("redis");
   if (redis && redis->isInt()) {
     options.emplace_back(ThreadType::REDIS, static_cast<int>(redis->asInt()));
   }

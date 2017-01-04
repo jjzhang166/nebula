@@ -25,8 +25,6 @@ set (SRC_LIST
   base_daemon.cc
   base_daemon.h
   configurable.h
-  configuration.cc
-  configuration.h
   plugin.h
   timer_manager.h
   id_util.cc

@@ -152,7 +152,7 @@ struct ThreadData {
 struct ThreadGroupListOption : public Configurable {
     
   // 先检查conn，如果conn已经设置则accept和client无效
-  bool SetConf(const std::string& conf_name, const Configuration& conf) override;
+  bool SetConf(const std::string& conf_name, const folly::dynamic& conf) override;
   
   struct ThreadGroupOption {
     ThreadGroupOption(ThreadType type, int size)

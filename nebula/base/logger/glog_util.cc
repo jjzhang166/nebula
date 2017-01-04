@@ -25,8 +25,6 @@
 #include <folly/Singleton.h>
 #include <folly/FBString.h>
 
-#include "nebula/base/configuration.h"
-
 namespace {
 folly::Singleton<nebula::LogInitializer> g_log_initializer;
 }
@@ -45,15 +43,12 @@ void LogInitializer::Initialize(const char* argv0) {
   // FLAGS_colorlogtostderr = true;
 }
 
-bool LogInitializer::SetConf(const std::string& conf_name, const Configuration& conf) {
+bool LogInitializer::SetConf(const std::string& conf_name, const folly::dynamic& conf) {
   std::string program_name = google::ProgramInvocationShortName() ?
                              google::ProgramInvocationShortName() : "";
   std::string logger_name;
 
-  folly::dynamic config_data = conf.GetDynamicConf();
-  if (!config_data.isObject()) {
-      return false;
-  }
+  folly::dynamic config_data = conf;
   
   // 设置 google::FATAL 级别的日志存储路径和文件名前缀
   auto fatal_dest = config_data.get_ptr("fatal_dest");

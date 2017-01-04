@@ -21,8 +21,6 @@
 #include <list>
 
 #include "nebula/base/base_daemon.h"
-#include "nebula/base/configuration.h"
-
 #include "nebula/net/base/service_base.h"
 #include "nebula/net/thread_group_list_manager.h"
 

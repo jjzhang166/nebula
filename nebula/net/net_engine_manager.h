@@ -23,8 +23,6 @@
 #include <folly/Singleton.h>
 #include <folly/futures/Future.h>
 
-#include "nebula/base/configuration.h"
-
 #include "nebula/net/thread_group_list_manager.h"
 #include "nebula/net/base/service_base.h"
 
