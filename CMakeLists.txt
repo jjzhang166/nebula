@@ -57,6 +57,7 @@ message("Proxygen lib: " ${PROXYGEN_LIBRARY})
 message("MySQL lib: " ${MYSQL_LIBRARY})
 
 link_directories(
+/usr/local/lib
 ${FOLLY_LIBRARYDIR}
 ${WANGLE_LIBRARYDIR}
 ${PROXYGEN_LIBRARYDIR}
