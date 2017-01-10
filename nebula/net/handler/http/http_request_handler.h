@@ -31,8 +31,10 @@ namespace nebula {
 class HttpRequestHandler : public proxygen::RequestHandler,
 	public std::enable_shared_from_this<HttpRequestHandler> {
 public:
-  HttpRequestHandler() = default;
-  virtual ~HttpRequestHandler() = default;
+  HttpRequestHandler()
+    : requestBody_(folly::IOBufQueue::cacheChainLength()) {}
+
+  virtual ~HttpRequestHandler();
   
   void onRequest(std::unique_ptr<proxygen::HTTPMessage> headers) noexcept override {
       request_ = std::move(headers);
@@ -47,23 +49,17 @@ public:
   void onEOM() noexcept override;
   
   virtual void OnHttpHandler(const proxygen::HTTPMessage& headers,
-                             const folly::IOBuf* body,
+                             folly::IOBufQueue* body,
                              proxygen::ResponseBuilder* r);
   
-  void requestComplete() noexcept override {
-    LOG(INFO) << "NebulaHttpRequestHandler, requestComplete!";
-    self.reset();
-  }
-  
-  void onError(proxygen::ProxygenError err) noexcept override {
-    LOG(ERROR) << "NebulaHttpRequestHandler, onError : " << err;
-    self.reset();
-  }
+  void requestComplete() noexcept override;
+
+  void onError(proxygen::ProxygenError err) noexcept override;
   
 protected:
   std::unique_ptr<proxygen::HTTPMessage> request_;
   folly::IOBufQueue requestBody_;
-  std::shared_ptr<HttpRequestHandler> self;
+  // std::shared_ptr<HttpRequestHandler> self;
 };
 
 class HttpRequestHandlerFactory : public proxygen::RequestHandlerFactory {
@@ -83,12 +79,14 @@ public:
 
 }
 
-typedef void(*ExecuteHttpHandler)(const proxygen::HTTPMessage&, const folly::IOBuf*, proxygen::ResponseBuilder*);
+typedef void(*ExecuteHttpHandler)(const proxygen::HTTPMessage&, folly::IOBufQueue*, proxygen::ResponseBuilder*);
 typedef nebula::FuncFactoryManager<ExecuteHttpHandler> ExecHttpHandlerFactory;
 
 #define REGISTER_HTTP_HANDLER(K, PATH, HANDLER) \
   static ExecHttpHandlerFactory::RegisterTemplate g_reg_http_handler_##K(PATH, &HANDLER)
 
+#define REGISTER_DEFAULT_HTTP_HANDLER(HANDLER) \
+static ExecHttpHandlerFactory::RegisterTemplate g_reg_default_http_handler(&HANDLER)
 
 #endif
 

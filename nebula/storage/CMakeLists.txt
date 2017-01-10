@@ -46,5 +46,5 @@ set (SRC_LIST
 add_library (storage ${SRC_LIST})
 target_link_libraries (storage -lmysqlclient -lhiredis)
 
-add_subdirectory(test)
+#add_subdirectory(test)
 

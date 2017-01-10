@@ -187,11 +187,11 @@ bool NetEngineManager::RegisterServiceBase(std::shared_ptr<ServiceBase> service)
              service->GetServiceType() == "rpc_server") {
     // tcp_server
     if (it == services_.end()) {
-      LOG(INFO) << "RegisterServiceBase - tcp_server: register tcp_server service " << service->GetServiceName();
+      LOG(INFO) << "RegisterServiceBase - register service: " << service->GetServiceConfig().ToString();
       services_.insert(std::make_pair(service->GetServiceName(), service));
       rv = true;
     } else {
-      LOG(FATAL) << "RegisterServiceBase - tcp_server: not group, duplicated service name: " << service->GetServiceName();
+      LOG(FATAL) << "RegisterServiceBase - duplicated service name: " << service->GetServiceName();
     }
   } else {
     // invalid service_type

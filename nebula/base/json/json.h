@@ -32,13 +32,13 @@
 
 // 使用go语言json接口
 template<typename T>
-T Unmarshal(const folly::dynamic& root) {
+inline T Unmarshal(const folly::dynamic& root) {
   return JsonConvertTo<T>(root);
 }
 
 // 会抛出异常...
 template<typename T>
-folly::dynamic Marshal(const T& o, const char* key = nullptr) {
+inline folly::dynamic Marshal(const T& o, const char* key = nullptr) {
   if (key == nullptr || key[0] == '\0' ) {
     return ToJsonDynamic(o);
   } else {
@@ -46,7 +46,7 @@ folly::dynamic Marshal(const T& o, const char* key = nullptr) {
   }
 }
 
-std::unique_ptr<folly::IOBuf> ToJsonIOBuf(const folly::dynamic& d) {
+inline std::unique_ptr<folly::IOBuf> ToJsonIOBuf(const folly::dynamic& d) {
   auto&& json = folly::toJson(d);
   return folly::IOBuf::copyBuffer(json.c_str(), json.length());
 }

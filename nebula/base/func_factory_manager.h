@@ -42,16 +42,27 @@ public:
         factories.emplace(k, f);
       }
     }
+    
+    explicit RegisterTemplate(F f) {
+      auto& default_func = FuncFactoryManager<F, K>::GetInstance().default_func_;
+      default_func = f;
+    }
   };
-  
+
   template<typename... Args>
   static bool Execute(const K& k, Args... args) {
     auto& factories = GetInstance().factories_;
     auto it = factories.find(k);
     if (it == factories.end()) {
-      // TODO(@benqi): 是否需要抛出异常？
-      LOG(ERROR) << "CreateInstance - not exist func key: " << k;
-      return false;
+      auto& default_f = GetInstance().default_func_;
+      if (default_f) {
+        default_f(args...);
+        return true;
+      } else {
+        // TODO(@benqi): 是否需要抛出异常？
+        LOG(ERROR) << "Execute - not exist func key: " << k;
+        return false;
+      }
     } else {
       it->second(args...);
       return true;
@@ -64,8 +75,15 @@ public:
     auto& factories = GetInstance().factories_;
     auto it = factories.find(k);
     if (it == factories.end()) {
-      LOG(ERROR) << "CreateInstance - not exist func key: " << k;
-      return false;
+      auto& default_f = GetInstance().default_func_;
+      if (default_f) {
+        (c->*default_f)(args...);
+        return true;
+      } else {
+        // TODO(@benqi): 是否需要抛出异常？
+        LOG(ERROR) << "Execute2 - not exist func key: " << k;
+        return false;
+      }
     } else {
       // TODO(@benqi): 是否需要抛出异常？
       (c->*it->second)(args...);
@@ -73,13 +91,13 @@ public:
     }
   }
 
-  // 执行类成员函数
+  // 有返回值
   template<typename... Args>
   static typename std::result_of<F(Args... args)>::type Execute3(const K& k, Args... args) {
     auto& factories = GetInstance().factories_;
     auto it = factories.find(k);
     if (it == factories.end()) {
-      LOG(ERROR) << "CreateInstance - not exist func key: " << k;
+      LOG(ERROR) << "Execute3 - not exist func key: " << k;
     } else {
     }
     
@@ -103,6 +121,7 @@ private:
   }
   
   std::unordered_map<K, F> factories_;
+  F default_func_;      // 默认
 };
 
 // template<class F, class K>

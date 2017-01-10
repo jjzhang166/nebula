@@ -38,11 +38,15 @@ void ModuleHttpInitialize() {
          });
 }
 
+HttpRequestHandler::~HttpRequestHandler() {
+  LOG(INFO) << "HttpRequestHandler Destroy...";
+}
+
 void HttpRequestHandler::onEOM() noexcept {
   try {
     proxygen::ResponseBuilder r(downstream_);
     r.status(200, "OK");
-    OnHttpHandler(*request_, requestBody_.front(), &r);
+    OnHttpHandler(*request_, &requestBody_, &r);
     r.sendWithEOM();
   } catch (const std::exception& ex) {
     proxygen::ResponseBuilder(downstream_)
@@ -57,8 +61,20 @@ void HttpRequestHandler::onEOM() noexcept {
   }
 }
 
+void HttpRequestHandler::requestComplete() noexcept {
+  LOG(INFO) << "NebulaHttpRequestHandler, requestComplete!";
+  delete this;
+  // self.reset();
+}
+
+void HttpRequestHandler::onError(proxygen::ProxygenError err) noexcept {
+  LOG(ERROR) << "NebulaHttpRequestHandler, onError : " << err;
+  delete this;
+  // self.reset();
+}
+
 void HttpRequestHandler::OnHttpHandler(const proxygen::HTTPMessage& headers,
-                                       const folly::IOBuf* body,
+                                       folly::IOBufQueue* body,
                                        proxygen::ResponseBuilder* r) {
   ExecHttpHandlerFactory::Execute(headers.getPath(), headers, body, r);
 }
