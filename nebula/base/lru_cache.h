@@ -34,11 +34,14 @@
 #include <map>
 #include <string>
 
-#include "base/logging.h"
-#include "base/port.h"
+#include "nebula/base/logger/glog_util.h"
+//#include "base/logging.h"
+//#include "base/port.h"
 
-namespace mozc {
-namespace storage {
+//namespace mozc {
+//namespace storage {
+
+namespace nebula {
 
 // Note: this class keeps some resources inside of the Key/Value, even if
 // such a entry is erased. Be careful to use for such classes.
@@ -137,7 +140,7 @@ class LRUCache {
   // lookup is not necessary.
   bool Evict(Element* element);
 
-  typedef map<Key, Element*> Table;
+  typedef std::map<Key, Element*> Table;
 
   Table* table_;
   Element* free_list_;     // singly linked list of Element
@@ -407,6 +410,8 @@ size_t LRUCache<Key, Value>::Size() const {
   return table_->size();
 }
 
-}  // namespace storage
-}  // namespace mozc
+//}  // namespace storage
+//}  // namespace mozc
+}
+
 #endif  // MOZC_STORAGE_LRU_CACHE_H_

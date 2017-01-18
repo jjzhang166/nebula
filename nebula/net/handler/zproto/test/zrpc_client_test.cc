@@ -55,8 +55,16 @@ protected:
   
 };
 
+#include <folly/Checksum.h>
+
 ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[]) {
+  
+  // auto method_id = folly::crc32c((const uint8_t*)message_name.data(), message_name.length());
+  std::string method_id("zproto.StartTestingAuthReq");
+  auto c = folly::crc32c((const uint8_t *)method_id.c_str(), method_id.length());
+  printf("%u\n", c);
+  
   return nebula::DoMain<ZRpcClientTest>(argc, argv);
 }
 

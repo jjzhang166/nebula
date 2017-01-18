@@ -88,6 +88,7 @@ std::string AttachDataMessage::ToString() const {
 bool Package::Decode(ProtoRawData& proto_raw_data) {
   message.swap(proto_raw_data.message_data);
   try {
+    seq_num = proto_raw_data.seq_num;
     folly::io::Cursor c_b(message.get());
     folly::io::Cursor c(message.get());
 
@@ -101,6 +102,10 @@ bool Package::Decode(ProtoRawData& proto_raw_data) {
     package_header.message_id = c.readBE<int64_t>();
 
     package_type = c.readBE<uint8_t>();
+
+    // package_type = proto_raw_data.command_id >> 16 & 0xff; //  c.readBE<uint8_t>();
+    // LOG(INFO) << "command_id: " << proto_raw_data.command_id << ", package_type:" << (int)package_type;
+    
     if (package_type == Package::ATTACH_DATA_MESSAGE) {
       _has_attach_data = true;
       attach_data.proto_revision = c.readBE<uint8_t>();
@@ -149,13 +154,18 @@ bool PackageMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) con
     
     // Frame
     iobw.writeBE(uint16_t(0x5342));
+    iobw.writeBE((uint16_t)(20));
+    
+    iobw.writeBE((uint16_t)(200));
     iobw.writeBE((uint16_t)(1));
-    iobw.writeBE(GetFrameType());
+
+    iobw.writeBE(seq_num);
+    iobw.writeBE(GetCommandID());
     
     // iobw.writeBE((uint8_t)(buf_len >> 16));
     // iobw.writeBE((uint16_t)buf_len & 0xffff);
-    iobw.writeBE((uint8_t)0);
-    iobw.writeBE((uint16_t)0);
+    // iobw.writeBE((uint8_t)0);
+    iobw.writeBE((uint32_t)0);
     
     
     // iobw.writeBE(GetPackageType());
@@ -169,7 +179,7 @@ bool PackageMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) con
     io_buf = std::move(io_buf2);
     
     auto size = io_buf->computeChainDataLength();
-    WriteBodyLength(static_cast<uint32_t>(size-12), io_buf.get());
+    WriteBodyLength(static_cast<uint32_t>(size-24), io_buf.get());
     
   } catch(const std::exception& e) {
     LOG(ERROR) << "SerializeToIOBuf - catch a threwn exception: " << folly::exceptionStr(e);

@@ -36,6 +36,7 @@ REGISTER_FRAME(Redirect);
 REGISTER_FRAME(Ack);
 REGISTER_FRAME(Handshake);
 REGISTER_FRAME(HandshakeResponse);
+REGISTER_FRAME(MarsSignal);
 
 
 void ReadMapStringString(folly::io::Cursor& c, std::map<std::string, std::string>& maps) {
@@ -58,10 +59,13 @@ void WriteMapStringString(IOBufWriter& iobw, const std::map<std::string, std::st
 }
 
 std::string Frame::ToString() const {
-  return folly::sformat("{{magic_number:{}, frame_index:{}, frame_type:{}, body_length:{}, crc32:{}}}",
+  return folly::sformat("{{magic_number:{}, head_length:{}, client_version: {}, frame_index:{}, seq_num:{}, command_id: {}, body_length:{}, crc32:{}}}",
                         magic_number,
+                        head_length,
+                        client_version,
                         frame_index,
-                        frame_type,
+                        seq_num,
+                        command_id,
                         body_length,
                         crc32);
 }
@@ -72,11 +76,17 @@ bool Frame::Decode(std::unique_ptr<folly::IOBuf> frame_data) {
   try {
     // TODO(@benqi): 检查数据合法
     magic_number = c.readBE<uint16_t>();
+    head_length = c.readBE<uint16_t>();
+    client_version = c.readBE<uint16_t>();
     frame_index = c.readBE<uint16_t>();
+    seq_num = c.readBE<uint32_t>();
+    command_id = c.readBE<uint32_t>();
+    // c.skip();
     
-    uint32_t tmp = c.readBE<int32_t>();
-    frame_type = tmp >> 24;
-    body_length = tmp & 0xffffff;
+    //uint32_t tmp = c.readBE<int32_t>();
+    //frame_type = tmp >> 24;
+    //body_length = tmp & 0xffffff;
+    body_length = c.readBE<uint32_t>();
     
     c.skip(body_length);
     crc32 = c.readBE<int32_t>();
@@ -84,7 +94,7 @@ bool Frame::Decode(std::unique_ptr<folly::IOBuf> frame_data) {
     // frame_data->trimStart(9);
     body.swap(frame_data);
     // body->trimStart(9);
-    nebula::io_buf_util::TrimStart(body.get(), HEADER_LEN);
+    nebula::io_buf_util::TrimStart(body.get(), MIN_HEADER_LEN);
     nebula::io_buf_util::TrimEnd(body.get(), TAILER_LEN);
   } catch (...) {
     // TODO(@wubenqi): error's log
@@ -102,13 +112,20 @@ bool FrameMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const
     // Frame
     
     iobw.writeBE(uint16_t(0x5342));
+    iobw.writeBE((uint16_t)(20));
+    iobw.writeBE((uint16_t)(200));
     iobw.writeBE((uint16_t)(1));
-    iobw.writeBE(GetFrameType());
     
+    // seq_number
+    iobw.writeBE(seq_num);
+    // command_id
+    iobw.writeBE(GetCommandID());
+    iobw.writeBE(0);
+
     // iobw.writeBE((uint8_t)(buf_len >> 16));
     // iobw.writeBE((uint16_t)buf_len & 0xffff);
-    iobw.writeBE((uint8_t)0);
-    iobw.writeBE((uint16_t)0);
+    //iobw.writeBE((uint8_t)0);
+    //iobw.writeBE((uint16_t)0);
 
     // TODO(@benqi): 使用skip(sizoef(uint32_t))
     // magic_number + frame_index
@@ -127,7 +144,7 @@ bool FrameMessage::SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const
     io_buf = std::move(io_buf2);
     
     auto size = io_buf->computeChainDataLength();
-    WriteBodyLength(static_cast<uint32_t>(size-12), io_buf.get());
+    WriteBodyLength(static_cast<uint32_t>(size-24), io_buf.get());
 
   } catch(const std::exception& e) {
     LOG(ERROR) << "SerializeToIOBuf - catch a threwn exception: " << folly::exceptionStr(e);

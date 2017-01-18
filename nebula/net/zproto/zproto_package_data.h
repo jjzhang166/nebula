@@ -155,7 +155,7 @@ struct Package {
   
   PackageHeader package_header;
   uint8_t package_type;
-  
+  uint32_t seq_num;
   bool _has_attach_data {false};
   AttachDataMessage attach_data;
   
@@ -167,6 +167,9 @@ struct Package {
 struct PackageMessage {
   virtual ~PackageMessage() = default;
   
+  uint32_t GetCommandID() const {
+    return (uint32_t)GetPackageType() << 16;
+  }
   /////////////////////////////////////////////////////////////////////
   // auth_id
   inline int64_t auth_id() const {
@@ -302,6 +305,7 @@ struct PackageMessage {
   virtual uint8_t GetPackageType() const = 0;
   
   virtual bool Decode(Package& package) {
+    seq_num = package.seq_num;
     package_header = package.package_header;
     _has_attach_data = package._has_attach_data;
     if (_has_attach_data) {
@@ -342,6 +346,9 @@ struct PackageMessage {
 
     iobw.writeBE(GetPackageType());
   }
+ 
+  uint32_t seq_num {0};
+  uint32_t command_id {0};
   
   PackageHeader package_header;
   bool _has_attach_data {false};

@@ -102,6 +102,7 @@ ProtoRpcResponsePtr ZRpcUtil::DoServiceCall(RpcRequestPtr request) {
   r->set_message_id(GetNextIDBySnowflake());
   r->set_auth_id(request->auth_id());
   r->set_session_id(request->session_id());
+  r->seq_num = request->seq_num;
   
   // 如果response未设置，则填充attach_data
   if (!r->has_attach_data() && request->has_attach_data()) {

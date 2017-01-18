@@ -46,16 +46,12 @@
 inline void WriteFrameIndex(uint16_t frame_index, folly::IOBuf* io_buf) {
   // uint32_t w = (uint32_t)(MAGIC_NUMBER << 16 | frame_index);
   auto i = folly::Endian::big(frame_index);
-  memcpy(io_buf->writableData() + sizeof(uint16_t), &i, sizeof(i));
-  // folly::io::RWPrivateCursor c(io_buf);
-  // c.writeBE((uint32_t)(MAGIC_NUMBER >> 16 & frame_index));
+  memcpy(io_buf->writableData() + 6, &i, sizeof(i));
 }
 
 inline void WriteBodyLength(uint32_t buf_len, folly::IOBuf* io_buf) {
-  uint8_t h = buf_len >> 16 & 0xff;
-  uint16_t l = folly::Endian::big((uint16_t)(buf_len & 0xffff));
-  memcpy(io_buf->writableData() + 5, &h, sizeof(h));
-  memcpy(io_buf->writableData() + 6, &l, sizeof(l));
+  uint32_t l = folly::Endian::big(buf_len);
+  memcpy(io_buf->writableData() + 16, &l, sizeof(l));
 }
 
 inline void WriteIOBuf(IOBufWriter& iobw, const folly::IOBuf* io_buf) {
@@ -79,6 +75,7 @@ void WriteMapStringString(IOBufWriter& iobw, const std::map<std::string, std::st
 // Connection Level
 struct Frame {
   enum FrameType {
+    // Frame层
     PROTO = 0x00,
     PING = 0x01,
     PONG = 0x02,
@@ -86,32 +83,45 @@ struct Frame {
     REDIRECT = 0x04,
     ACK = 0x05,
     HANDSHAKE = 0x06,
-    HANDSHAKE_RESPONSE = 0x07,
+    HANDSHAKE_RESPONSE = 07,
+    MARS_SIGNAL = 0x08,
   };
   
   enum {
-    HEADER_LEN = 8, // 2(sb) + 2(index) + 1(frame_type) + 3(body_length)
+    MIN_HEADER_LEN = 20,
+    MAX_HEADER_LEN = 1024,  // 给1K吧
     TAILER_LEN = 4, // crc32
   };
   
   inline uint32_t CalcFrameLength() const {
-    return HEADER_LEN + TAILER_LEN + body_length;
+    return MIN_HEADER_LEN + TAILER_LEN + body_length;
+  }
+  
+  uint8_t GetFrameType() const {
+    return command_id >> 24;
   }
   
   bool Decode(std::unique_ptr<folly::IOBuf> frame_data);
   
   std::string ToString() const;
   
-  uint16_t magic_number {0x5342}; // 两傻逼，给两字节('SB')
-  // Index of package starting from zero.
-  // If packageIndex is broken connection need to be dropped.
-  uint16_t  frame_index {0};
-  
-  // Type of message
-  uint8_t frame_type {0xFF};
-  // Package payload length
-  int32_t body_length {0};  // 3字节
-  // Package payload
+  uint16_t magic_number;    // {0x5342}; // 两傻逼，给两字节('SB')
+  uint16_t head_length;     // 头长度
+  uint16_t client_version;  // 客户端版本号
+  uint16_t frame_index;     // 包长度
+  uint32_t seq_num;         // {0};
+  uint32_t command_id;      // 命令ID
+
+//  uint16_t magic_number {0x5342}; // 两傻逼，给两字节('SB')
+//  // Index of package starting from zero.
+//  // If packageIndex is broken connection need to be dropped.
+//  uint16_t  frame_index {0};
+//  
+//  // Type of message
+//  uint8_t frame_type {0xFF};
+//  // Package payload length
+  uint32_t body_length {0};  // 3字节
+//  // Package payload
   
   std::unique_ptr<folly::IOBuf> body;
   
@@ -128,11 +138,18 @@ struct FrameMessage {
   virtual std::string ToString() const { return ""; }
   
   virtual uint32_t CalcFrameSize() const {
-    return Frame::HEADER_LEN + Frame::TAILER_LEN;
+    return Frame::MIN_HEADER_LEN + Frame::TAILER_LEN;
   }
   
   bool SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const;
   virtual void Encode(IOBufWriter& iobw) const {}
+  
+  virtual uint32_t GetCommandID() const {
+    return (uint32_t)GetFrameType() << 24;
+  }
+  
+  uint32_t seq_num{0};         // {0};
+  // uint32_t command_id{0};
 };
 
 // HEADER_PROTO = 0;
@@ -148,6 +165,8 @@ struct ProtoRawData : FrameMessage {
   // Impl from FrameMessage
   bool Decode(Frame& frame) override {
     message_data.swap(frame.body);
+    command_id = frame.command_id;
+    seq_num = frame.seq_num;
     return true;
   }
   
@@ -160,7 +179,13 @@ struct ProtoRawData : FrameMessage {
     WriteIOBuf(iobw, message_data.get());
   }
   
+  uint32_t GetCommandID() const override {
+    return command_id;
+  }
+  
   std::unique_ptr<folly::IOBuf> message_data;
+  
+  uint32_t command_id;      // 命令ID
 };
 
 
@@ -384,6 +409,28 @@ struct HandshakeResponse : public FrameMessage {
   
   // SHA256 of randomBytes from request
   uint8_t sha1[32];
+};
+
+
+struct MarsSignal : public FrameMessage {
+  enum {
+    HEADER = Frame::MARS_SIGNAL,
+  };
+  
+  uint8_t GetFrameType() const override {
+    return HEADER;
+  }
+  
+  bool Decode(Frame& frame) override {
+    return true;
+  }
+  
+  uint32_t CalcFrameSize() const override {
+    return FrameMessage::CalcFrameSize();
+  }
+  
+  void Encode(IOBufWriter& iobw) const override {
+  }
 };
 
 using FrameFactory = nebula::SelfRegisterFactoryManager<FrameMessage, uint8_t>;

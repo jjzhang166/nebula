@@ -66,16 +66,37 @@ void ZProtoFrameDecoder::read(Context* ctx, folly::IOBufQueue& q) {
   } while (1);
 }
 
+enum {
+  kUnpackOk = 0,
+  kHeaderContinue = 1,
+  kBodyContinue = 2,
+  kMagicNumberError = -1,
+  kHeadLengError = -2,
+  kClientVersionError = -3,
+  kFrameIndexError = -4,
+  kFrameTypeError = -5,
+  kCrc32Error = -6,
+  kLengthError = -7,
+};
+
 int ZProtoFrameDecoder::decode(Context* ctx, folly::IOBufQueue& buf, Frame& result) {
   if (buf.empty()) {
     return -1;
   }
   
+//  r >> magic_number
+//  >> head_length
+//  >> client_version
+//  >> frame_index
+//  >> seq_num
+//  >> command_id
+//  >> body.data_len;
+
   auto buf_length = buf.chainLength();
   
   if (result.body_length == 0) {
     // 先解码到body_length
-    if (buf_length >= Frame::HEADER_LEN) {
+    if (buf_length >= Frame::MIN_HEADER_LEN) {
       folly::io::Cursor c(buf.front());
       
       // 包索引/类型／body
@@ -83,33 +104,61 @@ int ZProtoFrameDecoder::decode(Context* ctx, folly::IOBufQueue& buf, Frame& resu
       if (result.magic_number != 0x5342) {
         LOG(ERROR) << "decode - Check magic_number invalid, 0x5342 != magic_number: " << result.magic_number;
         ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check magic_number invalid"));
-        return -2;
+        return kMagicNumberError;
       }
+      
+      result.head_length = c.readBE<uint16_t>();
+      if (result.head_length<Frame::MIN_HEADER_LEN || result.head_length > Frame::MAX_HEADER_LEN) {
+        LOG(ERROR) << "decode - Check head_length invalid, head_length = " << result.head_length;
+        ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check head_length invalid"));
+        return kHeadLengError;
+      }
+      
+      result.client_version = c.readBE<uint16_t>();
+      if (result.client_version!=200) {
+        LOG(ERROR) << "decode - Check client_version invalid, client_version = " << result.client_version;
+        ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check client_version invalid"));
+        return kClientVersionError;
+      }
+      
+      // TODO(@benqi): Check frame_index
+      // if (frame_index!=last_frame_index) {
+      //   // TODO(@benqi): XLOG
+      //   return kFrameIndexError;
+      // }
       result.frame_index = c.readBE<uint16_t>();
       // packageIndex is broken，要断开连接
-      if (false == CheckPackageIndex(result.frame_index)) {
-        LOG(ERROR) << "decode - Check package_index invalid, last_frame_index: "
-                    << last_frame_index_ << ", recved frame: " << result.ToString();
-        ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check package_index invalid"));
-        return -3;
+//      if (false == CheckPackageIndex(result.frame_index)) {
+//        LOG(ERROR) << "decode - Check package_index invalid, last_frame_index: "
+//        << last_frame_index_ << ", recved frame: " << result.ToString();
+//        ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check package_index invalid"));
+//        return kFrameIndexError;
+//      }
+
+      result.seq_num = c.readBE<uint32_t>();
+
+      result.command_id = c.readBE<uint32_t>();
+//      if (!CheckFrameType(command_id)) {
+//        // TODO(@benqi): XLOG
+//        return kFrameTypeError;
+//      }
+      
+      if (buf_length < result.head_length) {
+        LOG(WARNING) << "decode - need " << result.head_length << " byte, but only recv len: " << buf_length;
+        return kHeaderContinue;
       }
 
-      uint32_t tmp = c.readBE<uint32_t>();
-      
-      // TODO(@benqi): 检查frame_type
-      result.frame_type = tmp >> 24;
-      
-      result.body_length = tmp & 0xffffff;
+      result.body_length = c.readBE<uint32_t>();
       // TODO(@benqi): 使用宏或配置文件
-      if (result.body_length > MAX_FRAME_BODY_LEN) {
+      if (result.body_length + result.head_length + Frame::TAILER_LEN > MAX_FRAME_BODY_LEN) {
          LOG(ERROR) << "decode - Invalid body length(>1MB), recved frame: " << result.ToString();
         ctx->fireReadException(folly::make_exception_wrapper<std::runtime_error>("decode - Check body length invalid"));
-        return -5;
+        return kLengthError;
       }
 
     } else {
       // TODO(@wubenqi): 考虑日志输出更详细的信息(conn_id/ip...)
-      LOG(WARNING) << "decode - need 8 byte, but only recv len: " << buf_length;
+      LOG(WARNING) << "decode - need 20 byte, but only recv len: " << buf_length;
       return -1;
     }
   }
@@ -122,8 +171,10 @@ int ZProtoFrameDecoder::decode(Context* ctx, folly::IOBufQueue& buf, Frame& resu
     return -1;
   }
   
+   // LOG(INFO) << result.ToString();
+  
   // nebula::io_buf_util::TrimStart(&buf, 9);
-  buf.trimStart(Frame::HEADER_LEN);
+  buf.trimStart(Frame::MIN_HEADER_LEN);
   auto d = buf.split(result.body_length);
   result.body = std::move(d);
 
@@ -156,12 +207,14 @@ bool ZProtoFrameDecoder::OnFrameHandler(Context* ctx, Frame& frame) {
   //   return false;
   // }
   
-  auto frame_message = FrameFactory::CreateSharedInstance(frame.frame_type);
+  auto frame_message = FrameFactory::CreateSharedInstance(frame.GetFrameType());
   if (frame_message) {
     if (frame_message->Decode(frame) &&
         // 检查解压包的长度是否一致，避免格式一样，
         // 但数据长度不一样(FrameMessage里有string等字段，可能会有解压后长度与body长度不一致情况)
         frame_message->CalcFrameSize() == frame.CalcFrameLength()) {
+      frame_message->seq_num = frame.seq_num;
+      
       ctx->fireRead(frame_message);
     } else {
       LOG(ERROR) << "OnFrameHandler - Decode FrameMessage error " << frame.ToString();
@@ -192,10 +245,11 @@ void ZProtoFrameHandler::OnProtoRawData(Context* ctx, std::shared_ptr<FrameMessa
 
 void ZProtoFrameHandler::OnPing(Context* ctx, std::shared_ptr<FrameMessage> message) {
   CAST_PROTO_MESSAGE(Ping, ping);
-  // LOG(INFO) << "OnPing - recv ping";
+  // LOG(INFO) << "OnPing - recv ping: " << (char*)ping->random_bytes->data();
 
   // 直接返回
   Pong pong;
+  pong.seq_num = ping->seq_num;
   pong.random_bytes.swap(ping->random_bytes);
   WriteFrameMessage(ctx, &pong);
 }
@@ -211,7 +265,7 @@ void ZProtoFrameHandler::OnDrop(Context* ctx, std::shared_ptr<FrameMessage> mess
   CAST_PROTO_MESSAGE(Drop, drop);
   
   // TODO(@benqi): 调试环境开启
-  LOG(INFO) << "OnDrop - recv drop";
+  // LOG(INFO) << "OnDrop - recv drop";
   
   // 关闭连接
   // TODO(@benqi)
@@ -241,6 +295,8 @@ void ZProtoFrameHandler::OnHandshake(Context* ctx, std::shared_ptr<FrameMessage>
   LOG(INFO) << "OnHandshake - recv handshake";
   
   HandshakeResponse handshake_response;
+  handshake_response.seq_num = handshake->seq_num;
+
   handshake_response.proto_revision = handshake->proto_revision;
   handshake_response.api_major_version = handshake->api_major_version;
   handshake_response.api_minor_version = handshake->api_minor_version;
