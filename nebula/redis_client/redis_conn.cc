@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "nebula/storage/redis/redis_conn.h"
+#include "nebula/redis_client/redis_conn.h"
 
 #include <hiredis/hiredis.h>
 #include <folly/Format.h>

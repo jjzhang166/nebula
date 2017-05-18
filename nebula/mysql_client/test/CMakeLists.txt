@@ -17,15 +17,11 @@
 include_directories(/usr/local/include ../..)
 
 set (BASE_TEST_LIST
-  base_test.cc
-  factory_test.cc
-  futures_test.cc
-  json_test.cc
-  fibers_test.cc
+  mysql_client_test.cc
   )
 
 if(APPLE)
-add_executable (base_test ${BASE_TEST_LIST})
-target_link_libraries (base_test net base)
+add_executable (mysql_client_test ${BASE_TEST_LIST})
+target_link_libraries (mysql_client_test mysql_client net base)
 endif()
 

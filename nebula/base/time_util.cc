@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 
 #include "nebula/base/time_util.h"
 
+#include <time.h>
 #include <sys/time.h>
 
 int64_t NowInMsecTime() {

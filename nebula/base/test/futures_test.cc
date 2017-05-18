@@ -124,5 +124,5 @@ void FutureTest3() {
 }
 
 
-static TestingFuncManager g_testing_func(FutureTest3);
+// static TestingFuncManager g_testing_func(FutureTest3);
 

@@ -160,7 +160,7 @@ public:
 
 }; // class BasicStringBuilder
 
-typedef BasicStringBuilder<char> StringBuilder;
+typedef BasicStringBuilder<char> CStringBuilder;
 typedef BasicStringBuilder<wchar_t> WStringBuilder;
 
 #endif

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,12 @@
 // Author: wubenqi@gmail.com (wubenqi)
 //
 
-#include "nebula/storage/database_util.h"
+#include "nebula/mysql_client/mysql_query_util.h"
 
 #include <folly/Format.h>
 
 #include "nebula/base/logger/glog_util.h"
 // #include "base/strings/stringprintf.h"
-
-namespace db {
 
 namespace {
 
@@ -146,8 +144,6 @@ bool MakeQueryString(const char *query, QueryParam *param, int lmt, std::string 
 	}
   
   return true;
-}
-
 }
 
 

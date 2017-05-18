@@ -17,25 +17,18 @@
 #include_directories(/usr/local/include/mysql /usr/local/include)
 
 set (SRC_LIST
- ./base_database.h
- ./conn_pool_manager.cc
- ./conn_pool_manager.h
- ./database_dll.h
- ./database_serializable.h
- ./database_util.cc
- ./database_util.h
- ./mysql/mysql_database.cc
- ./mysql/mysql_database.h
- ./mysql/mysql_dll.cc
- ./db_base_object.cc
- ./db_base_object.h
- ./storage_util.cc
- ./storage_util.h
-
- ./redis/redis_conn.cc
- ./redis/redis_conn.h
- ./redis/redis_pool.cc
- ./redis/redis_pool.h
+mysql_client.cc
+mysql_client.h
+mysql_client_util.cc
+mysql_client_util.h
+mysql_conn.cc
+mysql_conn.h
+mysql_conn_pool.cc
+mysql_conn_pool.h
+mysql_result_set.cc
+mysql_result_set.h
+mysql_query_util.cc
+mysql_query_util.h
 )
 
 #link_directories(
@@ -43,8 +36,8 @@ set (SRC_LIST
 #)
 
 
-add_library (storage ${SRC_LIST})
-target_link_libraries (storage -lmysqlclient -lhiredis)
+add_library (mysql_client ${SRC_LIST})
+target_link_libraries (mysql_client /usr/local/mysql/lib/libmysqlclient.a)
 
-#add_subdirectory(test)
+add_subdirectory(test)
 

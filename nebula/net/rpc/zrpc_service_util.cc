@@ -43,20 +43,23 @@ folly::Future<ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& ser
   auto service = net_engine->Lookup(service_name);
   if (!service) {
     LOG(ERROR) << "Write - invalid error, not find service_name: " << service_name;
-    return folly::makeFuture(std::make_shared<RpcInternalError>(request->message_id()));
+    ProtoRpcResponsePtr r = std::make_shared<RpcInternalError>(request->message_id());
+    return folly::makeFuture(r);
   }
   
   auto group = std::static_pointer_cast<nebula::TcpClientGroupBase>(service);
   nebula::TcpClientGroupBase::OnlineTcpClient client;
   if (!group->GetOnlineClientByRandom(&client)) {
     LOG(ERROR) << "Write - invalid error, not online client's service_name: " << service_name;
-    return folly::makeFuture(std::make_shared<RpcInternalError>(request->message_id()));
+    ProtoRpcResponsePtr r = std::make_shared<RpcInternalError>(request->message_id());
+    return folly::makeFuture(r);
   }
   
   auto pipeline = client.second.lock();
   if (!pipeline) {
     LOG(ERROR) << "Write - invalid error, not online client's service_name: " << service_name;
-    return folly::makeFuture(std::make_shared<RpcInternalError>(request->message_id()));
+    ProtoRpcResponsePtr r = std::make_shared<RpcInternalError>(request->message_id());
+    return folly::makeFuture(r);
   }
   
   auto handler = dynamic_cast<ZRpcClientPipeline*>(pipeline.get())->getHandler<ZRpcClientHandler>();

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-#include "nebula/storage/storage_util.h"
+#include "nebula/mysql_client/mysql_client_util.h"
 
 #include <string>
 #include <map>
 
-#include "nebula/storage/conn_pool_manager.h"
+#include "nebula/mysql_client/mysql_client.h"
 
 // std::vector<CdbConnPoolManager*> g_db_conn_pools;
 // db::CdbConnPoolManager* g_db_conn_pool = nullptr;
 // db::CdbConnPoolManager* g_db_conn_pool = nullptr;
 
 namespace {
-  
+/*
 std::shared_ptr<db::CdbConnPoolManager> Make(const std::string db_name) {
   db::DBAddrInfo db_addr;
   db_addr.host = "localhost";
@@ -55,9 +55,10 @@ db::CdbConnPoolManager* GetDBConnPool(const std::string& db_name) {
     return it->second.get();
   }
 }
-  
+ */
 }
 
+#if 0
 int SqlQuery(const std::string& db_name, QueryWithResult& q) {
   int rv = 0;
   
@@ -119,6 +120,7 @@ int SqlExecute(const std::string& db_name, const BaseSqlQuery& query) {
   return db_conn->Execute(query_string);
 }
 
+#endif
 
 int DoStorageQuery(const std::string& db_name, MakeQueryStringFunc make_q, MakeQueryResultFunc make_r) {
   int rv = 0;
@@ -131,18 +133,21 @@ int DoStorageQuery(const std::string& db_name, MakeQueryStringFunc make_q, MakeQ
   }
 
   // TODO(@benqi): 这里可能会出错返回
-  auto db_conn_pool = GetDBConnPool(db_name);
-  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
+  auto db_conn_pool = GetMysqlConnPool(db_name);
+  // auto conn_pool = mysql_client.GetConnPool("nebula_platform");
+  // auto r = conn_pool->Query(q);
+
+  // db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
   // -1
-  
-  std::unique_ptr<db::QueryAnswer> answ(db_conn->Query(query_string));
-  if (answ.get() != NULL) {
+  auto query_result = db_conn_pool->Query(query_string);
+  // std::unique_ptr<db::QueryAnswer> answ(db_conn->Query(query_string));
+  if (query_result) {
     // bool is_empty;
-    rv = static_cast<int>(answ->GetRowCount());
+    rv = static_cast<int>(query_result->GetRowCount());
     // LOG(INFO) << "rv = " << rv;
     if(rv > 0) {
-      while (answ->FetchRow()) {
-        auto r = make_r(*answ);
+      while (query_result->FetchRow()) {
+        auto r = make_r(*query_result.result_set);
         if (r == QResultCode::BREAK) {
           // 只处理一个
           rv = 1;
@@ -171,9 +176,8 @@ int64_t DoStorageInsertID(const std::string& db_name, MakeQueryStringFunc make_q
   }
   
   // TODO(@benqi): 这里可能会出错返回，出错返回
-  auto db_conn_pool = GetDBConnPool(db_name);
-  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
-  return db_conn->ExecuteInsertID(query_string);
+  auto db_conn_pool = GetMysqlConnPool(db_name);
+  return db_conn_pool->ExecuteInsertID(query_string);
 }
 
 int DoStorageExecute(const std::string& db_name, MakeQueryStringFunc make_q) {
@@ -185,9 +189,7 @@ int DoStorageExecute(const std::string& db_name, MakeQueryStringFunc make_q) {
   }
   
   // TODO(@benqi): 这里可能会出错返回，出错返回
-  auto db_conn_pool = GetDBConnPool(db_name);
-  
-  db::ScopedPtr_DatabaseConnection db_conn(db_conn_pool);
-  return db_conn->Execute(query_string);
+  auto db_conn_pool = GetMysqlConnPool(db_name);
+  return db_conn_pool->Execute(query_string);
 }
 

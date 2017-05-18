@@ -15,28 +15,14 @@
  * limitations under the License.
  */
 
-#ifndef NEBULA_BASE_GLOG_UTIL_H_
-#define NEBULA_BASE_GLOG_UTIL_H_
+#include "nebula/redis_client/redis_client.h"
 
-#include <glog/logging.h>
-#include <glog/stl_logging.h>
-
-#include "nebula/base/configurable.h"
-
-namespace nebula {
-
-// 配置
-struct LogInitializer : public Configurable {
-  virtual ~LogInitializer() = default;
-  
-  static void Initialize(const char* argv0);
-  
-  // 配置改变
-  bool SetConf(const std::string& conf_name, const folly::dynamic& conf) override;
-};
-
-std::shared_ptr<LogInitializer> GetLogInitializerSingleton();
-
+bool RedisConnPoolMgr::Initialize(const std::vector<RedisAddrInfo>& redis_addr_list) {
+  for (const auto & addr : redis_addr_list) {
+    auto pool = std::make_shared<RedisConnPool>();
+    pool->Initialize(addr);
+    conn_pools_.insert(std::make_pair(addr.name, pool));
+  }
+  return true;
 }
 
-#endif

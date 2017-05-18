@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef REDIS_REDIS_CONN_H_
-#define REDIS_REDIS_CONN_H_
+#ifndef NEBULA_REDIS_CLIENT_REDIS_CONN_H_
+#define NEBULA_REDIS_CLIENT_REDIS_CONN_H_
 
 #include <string>
 // #include <folly/Range.h>
@@ -64,4 +64,4 @@ private:
 };
 
 
-#endif // REDIS_REDIS_CONN_H_
+#endif // NEBULA_REDIS_CLIENT_REDIS_CONN_H_

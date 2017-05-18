@@ -34,8 +34,9 @@ public:
   ~ZRpcMultiplexClientDispatcher() {
     Clear();
     
-    wangle::ClientDispatcherBase<
-    ZRpcClientPipeline, RpcRequestPtr, ProtoRpcResponsePtr>::~ClientDispatcherBase();
+    // TODO(@benqi): ClientDispatcherBase析构
+    // wangle::ClientDispatcherBase<
+    // ZRpcClientPipeline, RpcRequestPtr, ProtoRpcResponsePtr>::~ClientDispatcherBase();
   }
       
   void read(Context* ctx, ProtoRpcResponsePtr in) override;

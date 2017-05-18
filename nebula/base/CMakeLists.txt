@@ -29,6 +29,8 @@ set (SRC_LIST
   timer_manager.h
   id_util.cc
   id_util.h
+  fiber_context_manager.cc
+  fiber_context_manager.h
   config_manager.cc
   config_manager.h
   config/config_preprocessor.cc
@@ -56,7 +58,8 @@ set (SRC_LIST
   #readline_gets.cc
   #readline_gets.h
   time_syncor.h
-
+  lru_cache.h
+  mru_cache.h
   reflection_util.h
   traits.h
   json/json.cc
@@ -90,6 +93,6 @@ set (SRC_LIST
 )
 
 add_library(base STATIC ${SRC_LIST})
-target_link_libraries(base proxygenhttpserver proxygenlib wangle folly boost_context-mt   boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z inotify)
+target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z inotify)
 
-#add_subdirectory(test)
+add_subdirectory(test)

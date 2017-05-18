@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef REDIS_REDIS_POOL_H_
-#define REDIS_REDIS_POOL_H_
+#ifndef NEBULA_REDIS_CLIENT_REDIS_CONN_POOL_H_
+#define NEBULA_REDIS_CLIENT_REDIS_CONN_POOL_H_
 
 #include "nebula/base/basictypes.h"
 
@@ -26,17 +26,17 @@
 
 #include <glog/logging.h>
 
-#include "nebula/storage/redis/redis_conn.h"
+#include "nebula/redis_client/redis_conn.h"
 
 // TODO(@benqi): 功能和CdbConnPoolManager类似
 //   抽象出通用代码，可支持后续的Mongo连接池等
-class RedisConnPoolManager {
+class RedisConnPool {
 public:
-  RedisConnPoolManager()
+  RedisConnPool()
     : conned_pointer_(0) {
   }
   
-  ~RedisConnPoolManager() {
+  ~RedisConnPool() {
     Shutdown();
   }
   
@@ -48,7 +48,7 @@ public:
   void SetFreeConnection(RedisConn* conn);
   
 private:
-  friend class ScopedPtr_RedisConnection;
+  friend class ScopedRedisConn;
   struct RedisConnection {
     
     enum ConnState {
@@ -80,39 +80,28 @@ private:
   int conned_pointer_;
 };
 
-class ScopedPtr_RedisConnection {
+class ScopedRedisConn {
 public:
-  explicit ScopedPtr_RedisConnection(RedisConnPoolManager* pool) {
-    DCHECK(pool);
+  explicit ScopedRedisConn(RedisConnPool* pool) {
+    CHECK(pool);
     pool_ = pool;
     conn_ = pool_->GetFreeConnection();
   }
   
-  ~ScopedPtr_RedisConnection() {
+  ~ScopedRedisConn() {
     release();
   }
   
   RedisConn& operator*() const {
-    DCHECK(pool_);
-    if (conn_==NULL) {
-      conn_ = pool_->GetFreeConnection();
-    }
+    CHECK(conn_);
     return *(conn_);
   }
   
   RedisConn* operator->() const {
-    DCHECK(pool_);
-    if (conn_==NULL) {
-      conn_ = pool_->GetFreeConnection();
-    }
     return conn_;
   }
   
   RedisConn* get() const {
-    DCHECK(pool_);
-    if (conn_==NULL) {
-      conn_ = pool_->GetFreeConnection();
-    }
     return conn_;
   }
   
@@ -125,7 +114,6 @@ public:
   }
   
   void release() {
-    DCHECK(pool_);
     if (conn_) {
       pool_->SetFreeConnection(conn_);
       conn_ = NULL;
@@ -133,12 +121,12 @@ public:
   }
   
 private:
-  RedisConnPoolManager* pool_;
+  RedisConnPool* pool_;
   mutable RedisConn* conn_;
   
-  DISALLOW_COPY_AND_ASSIGN(ScopedPtr_RedisConnection);
+  DISALLOW_COPY_AND_ASSIGN(ScopedRedisConn);
 };
 
-RedisConnPoolManager* GetRedisConnPool(const std::string& name);
+RedisConnPool* GetRedisConnPool(const std::string& name);
 
-#endif // REDIS_REDIS_POOL_H_
+#endif // NEBULA_REDIS_CLIENT_REDIS_CONN_POOL_H_

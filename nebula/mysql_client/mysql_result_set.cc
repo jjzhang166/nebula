@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-#ifndef DB_DATABASE_DLL_H_
-#define DB_DATABASE_DLL_H_
+#include "nebula/mysql_client/mysql_result_set.h"
 
-namespace db {
-class BaseDatabase;
+#include <mysql/mysqld_error.h>
+
+#include <folly/Format.h>
+#include <folly/Conv.h>
+
+#include "nebula/base/logger/glog_util.h"
+
+uint32_t MysqlResultSet::GetIndexByFieldName(const folly::StringPiece& name) const {
+  uint32_t index = column_count_;
+  for (uint32_t i=0; i<column_count_; ++i) {
+    if (name.compare(fields_[i].name) == 0) {
+      index = i;
+      break;
+    }
+  }
+  return index;
 }
-
-extern "C" db::BaseDatabase* CreateDatabaseObject();
-extern "C" void DestroyDatabaseObject(db::BaseDatabase* db);
-
-
-typedef db::BaseDatabase* (*FN_CreateDatabaseObject)();
-typedef void (*FN_DestroyDatabaseObject)(db::BaseDatabase* db);
-
-
-#endif /* defined(DB_DATABASE_DLL_H_) */
-

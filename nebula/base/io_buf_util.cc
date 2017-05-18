@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,6 +38,7 @@ void TrimStart(folly::IOBuf* io_buf, size_t amount) {
       break;
     }
     amount -= io_buf->length();
+    io_buf->trimStart(io_buf->length());
     io_buf->pop();
   }
 }

@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 #include <gflags/gflags.h>
 #include <folly/Singleton.h>
 
-#ifdef __APPLE__
+#ifndef __APPLE__
 #include <folly/init/Init.h>
 #endif
 

@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-#include "nebula/storage/redis/redis_pool.h"
+#include "nebula/redis_client/redis_conn_pool.h"
 
 #include <folly/Format.h>
 
 
-size_t RedisConnPoolManager::Initialize(const RedisAddrInfo& addr) {
+size_t RedisConnPool::Initialize(const RedisAddrInfo& addr) {
   addr_ = addr;
   conn_pool_.resize(addr.max_conn_count);
   
@@ -39,7 +39,7 @@ size_t RedisConnPoolManager::Initialize(const RedisAddrInfo& addr) {
   return conned_pointer_;
 }
 
-void RedisConnPoolManager::Shutdown() {
+void RedisConnPool::Shutdown() {
   for (size_t i=0; i<conn_pool_.size(); ++i) {
     if (conn_pool_[i].conn != NULL) {
       delete conn_pool_[i].conn;
@@ -48,7 +48,7 @@ void RedisConnPoolManager::Shutdown() {
   conn_pool_.clear();
 }
 
-RedisConn* RedisConnPoolManager::GetFreeConnection() {
+RedisConn* RedisConnPool::GetFreeConnection() {
   RedisConn* conn = NULL;
   std::lock_guard<std::mutex> g(mutex_);
   
@@ -71,7 +71,7 @@ RedisConn* RedisConnPoolManager::GetFreeConnection() {
   return conn;
 }
 
-void RedisConnPoolManager::SetFreeConnection(RedisConn* conn) {
+void RedisConnPool::SetFreeConnection(RedisConn* conn) {
   std::lock_guard<std::mutex> g(mutex_);
   for (int i=0; i<conned_pointer_; ++i) {
     if (conn_pool_[i].conn == conn) {
@@ -83,19 +83,19 @@ void RedisConnPoolManager::SetFreeConnection(RedisConn* conn) {
 
 namespace {
   
-std::shared_ptr<RedisConnPoolManager> Make(const std::string name) {
+std::shared_ptr<RedisConnPool> Make(const std::string name) {
   RedisAddrInfo addr;
   addr.name = name;
-  auto pool = std::make_shared<RedisConnPoolManager>();
+  auto pool = std::make_shared<RedisConnPool>();
   pool->Initialize(addr);
   return pool;
 }
   
 }
 
-RedisConnPoolManager* GetRedisConnPool(const std::string& name) {
+RedisConnPool* GetRedisConnPool(const std::string& name) {
   // TODO(@benqi): 有问题
-  static std::map<std::string, std::shared_ptr<RedisConnPoolManager>> g_redis_conn_pools;
+  static std::map<std::string, std::shared_ptr<RedisConnPool>> g_redis_conn_pools;
   
   auto it = g_redis_conn_pools.find(name);
   if (it==g_redis_conn_pools.end()) {

@@ -17,10 +17,66 @@
 
 #include "nebula/base/testing/testing_util.h"
 
-// void SelfRegisterFactoryManagerTest();
+#include <iostream>
+#include <folly/ScopeGuard.h>
+#include <folly/io/async/DelayedDestruction.h>
+
+void ScopeGuradTest() {
+  std::cout << "begin: SCOPE_EXIT" << std::endl;
+  int i = 1;
+  
+  std::cout << "SCOPE_EXIT_" << __LINE__ << std::endl;
+  std::cout << "SCOPE_EXIT_" << __COUNTER__ << std::endl;
+
+  SCOPE_EXIT {
+    std::cout << "0: SCOPE_EXIT: " << i <<  std::endl;
+    ++i;
+    std::cout << "3: SCOPE_EXIT: " << i <<  std::endl;
+  };
+
+  ++i;
+  std::cout << "1: SCOPE_EXIT: " << i <<  std::endl;
+
+  std::cout << "SCOPE_EXIT_" << __COUNTER__ << std::endl;
+  std::cout << "SCOPE_EXIT_" << __LINE__ << std::endl;
+  SCOPE_EXIT {
+    std::cout << "4: SCOPE_EXIT: " << i <<  std::endl;
+    ++i;
+    std::cout << "2: SCOPE_EXIT: " << i <<  std::endl;
+  };
+
+  std::cout << "end: SCOPE_EXIT" << std::endl;
+}
+
+using namespace folly;
+
+class DeleteGuarder : public DelayedDestruction {
+  
+  ~DeleteGuarder() {
+    doFoo();
+  }
+  
+  void doFoo() {
+    DelayedDestructionBase::DestructorGuard dg(this);
+    LOG(INFO) << "foo";
+  }
+};
+
+void DelayedDestructionTest1() {
+  auto dg = new DeleteGuarder();
+  dg->destroy();
+}
+
+void DelayedDestructionTest2() {
+  auto dg = new DeleteGuarder();
+  DelayedDestructionBase::DestructorGuard guard(dg);
+  dg->destroy();
+}
 
 int main(int argc, char* argv[]) {
-  
+  DelayedDestructionTest1();
+  DelayedDestructionTest2();
+  // ScopeGuradTest();
   // SelfRegisterFactoryManagerTest();
   
   nebula::TestingFuncManager::Testing();

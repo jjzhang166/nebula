@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,7 +107,11 @@ public:
   folly::HHWheelTimer* GetHHWheelTimer() {
     return wheel_.get();
   }
-  
+
+  folly::EventBase* GetMainEventBase() {
+    return main_evb_;
+  }
+
 private:
   folly::EventBase* main_evb_ {nullptr};
   folly::HHWheelTimer::UniquePtr wheel_;

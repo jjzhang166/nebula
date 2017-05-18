@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,16 +18,17 @@
 // Author: wubenqi@gmail.com (wubenqi)
 //
 
-#ifndef DB_DATABASE_UTIL_H_
-#define DB_DATABASE_UTIL_H_
+#ifndef NEBULA_MYSQL_CLIENT_MYSQL_QUERY_UTIL_H_
+#define NEBULA_MYSQL_CLIENT_MYSQL_QUERY_UTIL_H_
 #pragma once
+
+#include <string.h>
 
 #include <string>
 #include <vector>
 // #include "base/basictypes.h"
 
 // TODO(@benqi): 使用模板简化
-namespace db {
 
 enum ColumnType { 
 	kColumnTypeStrEsc = 0,
@@ -105,6 +106,5 @@ bool MakeQueryString(const char *query, int lmt, std::string *query_string);
 bool MakeQueryString(const char *query, QueryParam *param, std::string *query_string);
 bool MakeQueryString(const char *query, QueryParam *param, int lmt, std::string *query_string);
 
-}
 
 #endif

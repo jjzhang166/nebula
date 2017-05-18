@@ -14,14 +14,25 @@
 # limitations under the License.
 #
 
-include_directories(/usr/local/include ../..)
+#include_directories(/usr/local/include/mysql /usr/local/include)
 
-set (BASE_TEST_LIST
-  storage_test.cc
-  )
+set (SRC_LIST
+redis_conn.cc
+redis_conn.h
+redis_conn_pool.cc
+redis_conn_pool.h
+redis_client.cc
+redis_client.h
+)
 
-if(APPLE)
-add_executable (storage_test ${BASE_TEST_LIST})
-target_link_libraries (storage_test storage net base)
-endif()
+
+#link_directories(
+#/usr/local/lib    
+#)
+
+
+add_library (redis_client ${SRC_LIST})
+target_link_libraries (redis_client -lhiredis)
+
+#add_subdirectory(test)
 

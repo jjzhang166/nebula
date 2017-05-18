@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im/nebula
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +15,4 @@
  * limitations under the License.
  */
 
-#include "nebula/storage/database_dll.h"
-
-#include "nebula/storage/mysql/mysql_database.h"
-
-db::BaseDatabase* CreateDatabaseObject() {
-  return new db::MySQLDatabase();
-}
-
-void DestroyDatabaseObject(db::BaseDatabase* db) {
-  if (db) {
-    delete db;
-  }
-}
-
+#include "nebula/base/fiber_context_manager.h"

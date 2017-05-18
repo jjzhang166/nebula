@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, https://github.com/zhatalk
+ *  Copyright (c) 2016, https://github.com/nebula-im
  *  All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,27 +15,16 @@
  * limitations under the License.
  */
 
-// Author: wubenqi@gmail.com (wubenqi)
-//
+#ifndef NEBULA_BASE_FIBER_CONTEXT_MANAGER_H_
+#define NEBULA_BASE_FIBER_CONTEXT_MANAGER_H_
 
-#include "nebula/storage/db_base_object.h"
+class FiberContextManager {
+public:
+  ~FiberContextManager() {}
+  
+  
+private:
+  
+};
 
-bool DBBaseObject::Load(DBResource& data) {
-	op_type_ = DB_LOAD;
-	return true;
-}
-
-bool DBBaseObject::AddNew(DBResource& data) {
-	op_type_ = DB_ADDNEW;
-	return true;
-}
-
-bool DBBaseObject::Delete(DBResource& data) {
-	op_type_ = DB_DELETE;
-	return true;
-}
-
-bool DBBaseObject::Save(DBResource& data) {
-	op_type_ = DB_DELETE;
-	return true;
-}
+#endif

@@ -17,6 +17,7 @@
 
 #include "nebula/base/crypto_util/big_number.h"
 
+#include <string.h>
 #include <openssl/bn.h>
 #include <algorithm>
 
