@@ -27,7 +27,13 @@
 
 #include "nebula/base/config/import_resolver_if.h"
 #include "nebula/base/config/config_preprocessor.h"
+
+#define DISABLE_INOTIFY // 暂时不支持inotify机制
+
+#ifndef DISABLE_INOTIFY
 #include "nebula/base/config/file_observer.h"
+#endif
+
 
 namespace {
 
@@ -136,6 +142,7 @@ bool ConfigManager::OnConfigDataUpdated(const folly::fbstring& config_data, bool
 
 
 void ConfigManager::StartObservingConfigFile(folly::EventBase* evb) {
+#ifndef DISABLE_INOTIFY
   if(is_watched_)
     return;
   
@@ -148,6 +155,7 @@ void ConfigManager::StartObservingConfigFile(folly::EventBase* evb) {
     LOG(INFO) << "ConfigManager - OnConfigDataUpdated, data " << data;
     OnConfigDataUpdated(data, false);
   }));
+#endif
 }
 
 }

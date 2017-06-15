@@ -38,10 +38,10 @@ set (SRC_LIST
   config/import_resolver_if.h
   config/rendezvous_hash.cc
   config/rendezvous_hash.h
-  config/file_observer.cc
-  config/file_observer.h
-  config/file_data_provider.cc
-  config/file_data_provider.h
+  #config/file_observer.cc
+  #config/file_observer.h
+  #config/file_data_provider.cc
+  #config/file_data_provider.h
   linked_hash_map.h
   linked_map.h
   iterator.h
