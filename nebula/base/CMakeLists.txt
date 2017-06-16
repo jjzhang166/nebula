@@ -93,6 +93,6 @@ set (SRC_LIST
 )
 
 add_library(base STATIC ${SRC_LIST})
-target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z inotify)
+target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z)
 
 add_subdirectory(test)
