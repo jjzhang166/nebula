@@ -57,8 +57,9 @@ public:
       
       // Impl from folly::HHWheelTimer::Callback
       void timeoutExpired() noexcept override {
+        int r = 0;
         try {
-          fn_();
+          r = fn_();
         } catch (std::exception const& e) {
           LOG(ERROR) << "ScheduleRepeatingTimeout timeoutExpired callback threw an exception: "
                       << e.what();
@@ -66,22 +67,18 @@ public:
           LOG(ERROR) << "ScheduleRepeatingTimeout timeoutExpired callback threw a non-exception.";
         }
         
-        // scheduleTimeout是否会抛出异常？？
-        try {
-          // TODO(@wubenqi):
-          //   需要判断scheduleTimeout是否成功
-          timer_manager_->wheel_->scheduleTimeout(this, timeout_);
-        } catch (std::exception const& e) {
-          LOG(ERROR) << "ScheduleRepeatingTimeout timeoutExpired threw an exception: "
-                      << e.what();
-        } catch (...) {
-          LOG(ERROR) << "ScheduleRepeatingTimeout timeoutExpired threw a non-exception.";
-        }
+        if (r==0) {
+          auto f = fn_;
+          timer_manager_->ScheduleRepeatingTimeout(f, timeout_);
+       }
+ 
+        delete this;
       }
       
       void callbackCanceled() noexcept override {
+        LOG(INFO) << "ScheduleRepeatingTimeout - " << timeout2_;
         try {
-          fn_();
+          // fn_();
         } catch (std::exception const& e) {
           LOG(ERROR) << "ScheduleRepeatingTimeout callbackCanceled callback threw an exception: "
                         << e.what();
@@ -96,18 +93,17 @@ public:
     private:
       TimerManager* timer_manager_;
       F fn_;
-      std::chrono::milliseconds timeout_;
-      // uint32_t timeout_;      // 缓存定时时间，循环调用时
+      uint32_t timeout_;      // 缓存定时时间，循环调用时
     };
 
     Wrapper* w = new Wrapper(this, std::move(fn), timeout);
     wheel_->scheduleTimeout(w, std::chrono::milliseconds(timeout));
   }
 
-  folly::HHWheelTimer* GetHHWheelTimer() {
-    return wheel_.get();
+  void cancelAll() {
+    wheel_->cancelAll();
   }
-
+  
   folly::EventBase* GetMainEventBase() {
     return main_evb_;
   }

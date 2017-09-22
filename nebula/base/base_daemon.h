@@ -22,9 +22,10 @@
 #ifndef	NEBULA_BASE_BASE_DAEMON_H_
 #define	NEBULA_BASE_BASE_DAEMON_H_
 
+#include <folly/init/Init.h>
 #include <folly/io/async/EventBase.h>
 
-#include "nebula/base/initializer.h"
+#include "nebula/base/logger/glog_util.h"
 
 namespace nebula {
 
@@ -41,6 +42,11 @@ public:
   // 依次执行初始化函数,循环驱动函数,与销毁函数,最后关闭日志
   // 其中每一步都记录到日志中.
   bool DoMain();
+  
+  // 退出
+  void DoQuit() {
+    Quit();
+  }
   
 protected:
   // 读取配置文件,默认的配置文件名为argv[0].json,与argv[0]在同一目录
@@ -59,9 +65,13 @@ protected:
   
   // 循环驱动函数
   virtual bool Run();
-  
+
+  // 退出
+  virtual void Quit();
+
   // 内部循环驱动函数
   bool RunInternal( );
+
   
   folly::EventBase main_eb_;
   std::unique_ptr<TimerManager> timer_manager_;
@@ -72,8 +82,9 @@ protected:
 // 应用程序启动帮助类
 template<class DAEMON>
 int DoMain(int argc, char** argv) {
-  Initializer(&argc, &argv);
-  
+  folly::init(&argc, &argv, true);
+  LogInitializer::Initialize(argv[0]);
+
   DAEMON daemon;
   return daemon.DoMain();
 }

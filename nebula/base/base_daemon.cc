@@ -32,11 +32,17 @@ DEFINE_string(config, "", "json config file");
 namespace {
   
 // 接收信号后执行退出程序
-folly::EventBase* g_main_evb = nullptr;
-
-void OnShutdownDaemon(folly::EventBase* main_evb) {
-  if (main_evb) {
-    main_evb->terminateLoopSoon();
+// folly::EventBase* g_main_evb = nullptr;
+nebula::BaseDaemon* g_main_daemon = nullptr;
+  
+void OnShutdownDaemon(nebula::BaseDaemon* main_daemon) {
+  // LOG(INFO) << "OnShutdownDaemon...";
+  // if (main_evb) {
+  //   // DCHECK()
+  //   main_evb->terminateLoopSoon();
+  // }
+  if (main_daemon) {
+    main_daemon->DoQuit();
   }
 }
 
@@ -45,7 +51,7 @@ void SignalHandler(int signum) {
     case SIGTERM:
     case SIGINT:
     case SIGHUP:
-      OnShutdownDaemon(g_main_evb);
+      OnShutdownDaemon(g_main_daemon);
       break;
   }
 }
@@ -57,7 +63,8 @@ namespace nebula {
 BaseDaemon::BaseDaemon()
   : timer_manager_(folly::make_unique<TimerManager>(&main_eb_)) {
   
-  g_main_evb = &main_eb_;
+  // g_main_evb = &main_eb_;
+  g_main_daemon = this;
   config_manager_ = ConfigManager::GetInstance();
   
   // 注册logger配置
@@ -65,7 +72,7 @@ BaseDaemon::BaseDaemon()
 }
                    
 BaseDaemon::~BaseDaemon() {
-  g_main_evb = nullptr;
+  g_main_daemon = nullptr;
 }
 
 bool BaseDaemon::LoadConfig(const std::string& config_file) {
@@ -86,6 +93,11 @@ bool BaseDaemon::Run() {
   LOG(INFO) << "Run - Run...";
   main_eb_.loopForever();
   return true;
+}
+
+// 退出
+void BaseDaemon::Quit() {
+  main_eb_.terminateLoopSoon();
 }
 
 bool BaseDaemon::RunInternal() {
@@ -139,7 +151,7 @@ bool BaseDaemon::DoMain() {
 	LOG(INFO) << "DoMain - Shutdown...";
 	return true;
 }
-                   
+
 const char* GetInstanceName() {
   return google::ProgramInvocationShortName();
 }
