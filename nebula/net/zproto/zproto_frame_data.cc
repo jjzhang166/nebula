@@ -19,6 +19,8 @@
 
 #include <folly/Format.h>
 
+using namespace zproto;
+
 // 模板不是类型, typedef只能给类型取别名。
 // using关键字可以给模板取别名
 template <class T>

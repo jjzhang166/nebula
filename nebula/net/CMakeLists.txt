@@ -76,7 +76,7 @@ set (SRC_LIST
   zproto/zproto_frame_data.h
   zproto/zproto_package_data.cc
   zproto/zproto_package_data.h
-  zproto/api_message_box.h
+  zproto/zproto_api_message_box.h
 
   rpc/zrpc_client_handler.cc
   rpc/zrpc_client_handler.h
@@ -91,11 +91,18 @@ set (SRC_LIST
   rpc/zrpc_module.cc
   rpc/zrpc_service_util.cc
   rpc/zrpc_service_util.h
+
+  handler/mtproto/mtproto_transport_handler.cc
+  handler/mtproto/mtproto_transport_handler.h
+  handler/mtproto/mtproto_handler.cc
+  handler/mtproto/mtproto_handler.h
+  handler/mtproto/mtproto_pipeline_factory.cc
+  handler/mtproto/mtproto_pipeline_factory.h
 )
 
 add_library(net STATIC ${SRC_LIST})
 target_link_libraries(net)
 
 #add_subdirectory(handler/zproto/test)
-#add_subdirectory(test)
+add_subdirectory(test)
 #add_subdirectory(zproto/api/cc)

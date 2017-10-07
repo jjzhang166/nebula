@@ -151,7 +151,8 @@ void ConfigManager::StartObservingConfigFile(folly::EventBase* evb) {
                      *evb,
                      100,
                      10000,
-                     std::move([this](std::string data) {
+                     [this](std::string data) {
+                     // std::move([this](std::string data) {
     LOG(INFO) << "ConfigManager - OnConfigDataUpdated, data " << data;
     OnConfigDataUpdated(data, false);
   }));

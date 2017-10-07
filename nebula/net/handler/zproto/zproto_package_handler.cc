@@ -19,6 +19,7 @@
 
 #include "nebula/base/func_factory_manager.h"
 
+using namespace zproto;
 ///////////////////////////////////////////////////////////////////////////////////////
 // 初始化
 // Package
@@ -42,13 +43,13 @@ REGISTER_EXECUTE_PACKAGE_HANDLER(ResponseDoDH);
 // REGISTER_EXECUTE_PACKAGE_HANDLER(AttachDataMessage);
 REGISTER_EXECUTE_PACKAGE_HANDLER(Container);
 
-REGISTER_EXECUTE_PACKAGE_HANDLER(EncodedRpcRequest);
-REGISTER_EXECUTE_PACKAGE_HANDLER(EncodedRpcOk);
+REGISTER_EXECUTE_PACKAGE_HANDLER(RpcRequest);
+REGISTER_EXECUTE_PACKAGE_HANDLER(RpcOk);
 REGISTER_EXECUTE_PACKAGE_HANDLER(RpcError);
 REGISTER_EXECUTE_PACKAGE_HANDLER(RpcFloodWait);
 REGISTER_EXECUTE_PACKAGE_HANDLER(RpcInternalError);
 
-REGISTER_EXECUTE_PACKAGE_HANDLER(EncodedPush);
+REGISTER_EXECUTE_PACKAGE_HANDLER(Push);
 REGISTER_EXECUTE_PACKAGE_HANDLER(MessageAck);
 
 REGISTER_EXECUTE_PACKAGE_HANDLER(UnsentMessage);
@@ -131,11 +132,11 @@ void ZProtoPackageHandler::OnContainer(Context* ctx, std::shared_ptr<PackageMess
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void ZProtoPackageHandler::OnEncodedRpcRequest(Context* ctx, std::shared_ptr<PackageMessage> message) {
+void ZProtoPackageHandler::OnRpcRequest(Context* ctx, std::shared_ptr<PackageMessage> message) {
   ctx->fireRead(message);
 }
 
-void ZProtoPackageHandler::OnEncodedRpcOk(Context* ctx, std::shared_ptr<PackageMessage> message) {
+void ZProtoPackageHandler::OnRpcOk(Context* ctx, std::shared_ptr<PackageMessage> message) {
   ctx->fireRead(message);
 }
 
@@ -153,7 +154,7 @@ void ZProtoPackageHandler::OnRpcInternalError(Context* ctx, std::shared_ptr<Pack
 
 
 ////////////////////////////////////////////////////////////////////////////
-void ZProtoPackageHandler::OnEncodedPush(Context* ctx, std::shared_ptr<PackageMessage> message) {
+void ZProtoPackageHandler::OnPush(Context* ctx, std::shared_ptr<PackageMessage> message) {
   ctx->fireRead(message);
 }
 

@@ -30,6 +30,7 @@
 #include "nebula/net/handler/zproto/zproto_pipeline_factory.h"
 
 using namespace nebula;
+using namespace zproto;
 
 // 保活心跳
 #define HEARTBEAT_TIMEOUT 10000 // 心跳间隔时间：10s
@@ -63,7 +64,7 @@ static ServiceSelfRegisterTemplate g_reg_zproto_tcp_server(std::make_pair("tcp_s
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-void ZProtoHandler::read(Context* ctx, std::shared_ptr<PackageMessage> msg) {
+void ZProtoHandler::read(Context* ctx, std::shared_ptr<zproto::PackageMessage> msg) {
   LOG(INFO) << "read - received data: "; // << msg;
   auto pipeline = dynamic_cast<ZProtoPipeline*>(ctx->getPipeline());
 
@@ -139,7 +140,7 @@ folly::Future<folly::Unit> ZProtoHandler::close(Context* ctx) {
 void ZProtoHandler::DoHeartBeat(uint64_t conn_id, uint32_t timeout) {
   auto pl = GetConnManagerByThreadLocal().FindPipeline(conn_id);
   if (pl) {
-    Ping ping("zproto_handler");
+    zproto::Ping ping("zproto_handler");
     std::unique_ptr<folly::IOBuf> data;
     ping.SerializeToIOBuf(data);
     nebula::write(pl, std::move(data));

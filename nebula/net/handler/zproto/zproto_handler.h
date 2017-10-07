@@ -29,16 +29,18 @@
 
 // using TeamtalkPipeline = wangle::Pipeline<folly::IOBufQueue&, std::shared_ptr<teamtalk::PackageMessage>>;
 
-using ZProtoEventCallback = NebulaEventCallback<nebula::ZProtoPipeline, PackageMessagePtr>;
+using ZProtoEventCallback = NebulaEventCallback<nebula::ZProtoPipeline, zproto::PackageMessagePtr>;
 
-class ZProtoHandler : public wangle::HandlerAdapter<std::shared_ptr<PackageMessage>, std::unique_ptr<folly::IOBuf>>, public nebula::NebulaBaseHandler {
+class ZProtoHandler :
+    public wangle::HandlerAdapter<std::shared_ptr<zproto::PackageMessage>, std::unique_ptr<folly::IOBuf>>,
+    public nebula::NebulaBaseHandler {
 public:
   explicit ZProtoHandler(nebula::ServiceBase* service)
     : NebulaBaseHandler(service) {}
   
   //////////////////////////////////////////////////////////////////////////
   // 重载 HandlerAdapter<std::unique_ptr<IOBuf>>
-  void read(Context* ctx, std::shared_ptr<PackageMessage> msg) override;
+  void read(Context* ctx, std::shared_ptr<zproto::PackageMessage> msg) override;
   // folly::Future<folly::Unit> write(Context* ctx, std::unique_ptr<folly::IOBuf> out) override;
   
   void readEOF(Context* ctx) override;

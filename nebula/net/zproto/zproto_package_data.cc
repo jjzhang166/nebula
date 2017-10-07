@@ -17,6 +17,8 @@
 
 #include "nebula/net/zproto/zproto_package_data.h"
 
+using namespace zproto;
+
 template <class T>
 using PackageRegister = nebula::SelfRegisterFactoryManager<PackageMessage, uint8_t>::RegisterTemplate<T>;
 
@@ -34,13 +36,13 @@ REGISTER_PACKAGE(ResponseGetServerKey);
 REGISTER_PACKAGE(RequestDH);
 REGISTER_PACKAGE(ResponseDoDH);
 
-REGISTER_PACKAGE(EncodedRpcRequest);
-REGISTER_PACKAGE(EncodedRpcOk);
+REGISTER_PACKAGE(RpcRequest);
+REGISTER_PACKAGE(RpcOk);
 REGISTER_PACKAGE(RpcFloodWait);
 REGISTER_PACKAGE(RpcError);
 REGISTER_PACKAGE(RpcInternalError);
 
-REGISTER_PACKAGE(EncodedPush);
+REGISTER_PACKAGE(Push);
 REGISTER_PACKAGE(MessageAck);
 
 REGISTER_PACKAGE(UnsentMessage);

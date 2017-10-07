@@ -78,7 +78,7 @@ ZRpcServerPipeline::Ptr ZRpcServerPipelineFactory::newPipeline(std::shared_ptr<f
   // pipeline->addBack(SerialServerDispatcher<Bonk>(&service_));
   // Or a Pipelined Dispatcher
   // pipeline->addBack(PipelinedServerDispatcher<Bonk>(&service_));
-  pipeline->addBack(wangle::MultiplexServerDispatcher<RpcRequestPtr, ProtoRpcResponsePtr>(&rpc_service_));
+  pipeline->addBack(wangle::MultiplexServerDispatcher<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr>(&rpc_service_));
   pipeline->finalize();
   
   return pipeline;

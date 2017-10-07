@@ -30,10 +30,12 @@
 
 #include "nebula/net/rpc/zrpc_client_handler.h"
 
+using namespace zproto;
+
 // std::map<int, ZRpcUtil::ServiceFunc> ZRpcUtil::g_rpc_services;
 // static ProtoRpcResponsePtr kEmptyResponse;
 
-folly::Future<ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& service_name, RpcRequestPtr request) {
+folly::Future<zproto::ProtoRpcResponsePtr> ZRpcUtil::DoClientCall(const std::string& service_name, zproto::RpcRequestPtr request) {
   CHECK(request);
   
   // TODO(@benqi): 移入tcp_client_group_util.h里

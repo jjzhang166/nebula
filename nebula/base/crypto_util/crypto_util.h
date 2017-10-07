@@ -79,6 +79,8 @@ public:
   // 初始化key
   // 注意：如果key长度不为32或iv长度不为16，会抛出异常
   AesCtrEncrypt(folly::ByteRange key, folly::ByteRange iv);
+  AesCtrEncrypt(uint8_t* key, int key_len, uint8_t* iv, int iv_len);
+
   ~AesCtrEncrypt() = default;
   
   uint32_t Encrypt(const uint8_t* in, uint8_t* out, uint32_t len);
@@ -105,6 +107,8 @@ private:
 };
 
 // void GenerateRsaKey();
+
+void aesIgeEncryption(uint8_t *buffer, uint8_t *key, uint8_t *iv, bool encrypt, bool changeIv, uint32_t length);
 
 // Hex工具函数
 std::string ToHexStr(folly::ByteRange sp);

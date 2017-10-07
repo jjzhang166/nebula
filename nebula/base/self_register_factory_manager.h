@@ -39,6 +39,7 @@ public:
       if (it != factories.end()) {
         LOG(ERROR) << "RegisterTemplate - duplicate entry for key: " << k;
       } else {
+        // LOG(INFO) << "RegisterTemplate - k: " << k;
         factories.emplace(k, [] { return new T(); });
       }
     }
@@ -49,6 +50,7 @@ public:
       if (it != factories.end()) {
         LOG(ERROR) << "RegisterTemplate - duplicate entry for key: " << k;
       } else {
+        // LOG(INFO) << "RegisterTemplate - k: " << k;
         factories.emplace(k, new_func);
       }
     }
@@ -74,6 +76,7 @@ public:
         // TODO(@wubenqi): 是否需要抛出异常？
         LOG(ERROR) << "RegisterTemplate - duplicate entry for key: " << k;
       } else {
+        // LOG(INFO) << "RegisterTemplate - k: " << k;
         // lambda表达式
         factories.emplace(k, [&] { return new_func(args...); });
       }

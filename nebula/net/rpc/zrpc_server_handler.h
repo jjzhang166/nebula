@@ -23,19 +23,19 @@
 #include "nebula/net/zproto/zproto_package_data.h"
 #include "nebula/net/handler/nebula_base_handler.h"
 
-using ZRpcServerPipeline = wangle::Pipeline<folly::IOBufQueue&, ProtoRpcResponsePtr>;
+using ZRpcServerPipeline = wangle::Pipeline<folly::IOBufQueue&, zproto::ProtoRpcResponsePtr>;
 
 // A real rpc server would probably use generated client/server stubs
 class ZRpcServerHandler : public nebula::NebulaBaseHandler, public wangle::Handler<
-  PackageMessagePtr, RpcRequestPtr,
-  ProtoRpcResponsePtr, std::unique_ptr<folly::IOBuf>> {
+  zproto::PackageMessagePtr, zproto::RpcRequestPtr,
+  zproto::ProtoRpcResponsePtr, std::unique_ptr<folly::IOBuf>> {
 public:
     explicit ZRpcServerHandler(nebula::ServiceBase* service)
       : NebulaBaseHandler(service) {}
 
-    virtual void read(Context* ctx, PackageMessagePtr msg) override;
+    virtual void read(Context* ctx, zproto::PackageMessagePtr msg) override;
   
-    virtual folly::Future<folly::Unit> write(Context* ctx, ProtoRpcResponsePtr rsp) override;
+    virtual folly::Future<folly::Unit> write(Context* ctx, zproto::ProtoRpcResponsePtr rsp) override;
     
     virtual void readEOF(Context* ctx) override;
     virtual void readException(Context* ctx, folly::exception_wrapper e) override;

@@ -22,9 +22,9 @@
 
 #include "nebula/net/zproto/zproto_frame_data.h"
 
-class ZProtoFrameDecoder : public wangle::InboundHandler<folly::IOBufQueue&, std::shared_ptr<FrameMessage>> {
+class ZProtoFrameDecoder : public wangle::InboundHandler<folly::IOBufQueue&, std::shared_ptr<zproto::FrameMessage>> {
 public:
-  typedef typename InboundHandler<folly::IOBufQueue&, std::shared_ptr<FrameMessage>>::Context Context;
+  typedef typename InboundHandler<folly::IOBufQueue&, std::shared_ptr<zproto::FrameMessage>>::Context Context;
   
   ZProtoFrameDecoder() = default;
   
@@ -44,7 +44,7 @@ protected:
   //  非法包，packageIndex is broken，要断开连接
   //  CRC32校验错误，要断开连接
   //  header无法识别，忽略
-  bool OnFrameHandler(Context* ctx, Frame& frame);
+  bool OnFrameHandler(Context* ctx, zproto::Frame& frame);
   
 private:
   
@@ -55,7 +55,7 @@ private:
   //     包不完整，但已经知道了整个frame的长度，也就是已经收到了body的length
   //  0: 刚好一个完整frame
   //  1: 超过一个frame
-  int decode(Context* ctx, folly::IOBufQueue& buf, Frame& result);
+  int decode(Context* ctx, folly::IOBufQueue& buf, zproto::Frame& result);
   
   bool CheckPackageIndex(uint16_t frame_index);
   
@@ -63,29 +63,29 @@ private:
   uint16_t last_frame_index_ {0};
   // {std::numeric_limits<uint16_t>::max()};   //
   // int32_t decoded_body_length_ {0}    // >0，则已经解析出frame长度
-  Frame cached_frame_;
+  zproto::Frame cached_frame_;
 };
 
 class ZProtoFrameHandler : public wangle::Handler<
-        std::shared_ptr<FrameMessage>, std::shared_ptr<ProtoRawData>,
+        std::shared_ptr<zproto::FrameMessage>, std::shared_ptr<zproto::ProtoRawData>,
         std::unique_ptr<folly::IOBuf>, std::unique_ptr<folly::IOBuf>> {
 public:
   ZProtoFrameHandler() = default;
   
-  void read(Context* ctx, std::shared_ptr<FrameMessage> msg) override;
+  void read(Context* ctx, std::shared_ptr<zproto::FrameMessage> msg) override;
   folly::Future<folly::Unit> write(Context* ctx, std::unique_ptr<folly::IOBuf> msg) override;
 
-  void OnProtoRawData(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnPing(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnPong(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnDrop(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnRedirect(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnAck(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnHandshake(Context* ctx, std::shared_ptr<FrameMessage> message);
-  void OnHandshakeResponse(Context* ctx, std::shared_ptr<FrameMessage> message);
+  void OnProtoRawData(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnPing(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnPong(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnDrop(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnRedirect(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnAck(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnHandshake(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
+  void OnHandshakeResponse(Context* ctx, std::shared_ptr<zproto::FrameMessage> message);
           
 private:
-  void WriteFrameMessage(Context *ctx, const FrameMessage* message);
+  void WriteFrameMessage(Context *ctx, const zproto::FrameMessage* message);
           
   uint16_t last_send_frame_index_ {0};
 };

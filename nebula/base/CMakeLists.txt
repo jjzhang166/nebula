@@ -38,10 +38,10 @@ set (SRC_LIST
   config/import_resolver_if.h
   config/rendezvous_hash.cc
   config/rendezvous_hash.h
-  #config/file_observer.cc
-  #config/file_observer.h
-  #config/file_data_provider.cc
-  #config/file_data_provider.h
+  # config/file_observer.cc
+  # config/file_observer.h
+  # config/file_data_provider.cc
+  # config/file_data_provider.h
   linked_hash_map.h
   linked_map.h
   iterator.h
@@ -62,6 +62,9 @@ set (SRC_LIST
   mru_cache.h
   reflection_util.h
   traits.h
+  zlib_util.cc
+  zlib_util.h
+
   json/json.cc
   json/json.h
   json/dynamic_converter.h
@@ -87,12 +90,12 @@ set (SRC_LIST
   crypto_util/dh_util.h
   crypto_util/crypto_util.cc
   crypto_util/crypto_util.h
-
   testing/testing_util.cc
   testing/testing_util.h
 )
 
 add_library(base STATIC ${SRC_LIST})
-target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z)
+target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z inotify)
+# target_link_libraries(base proxygenhttpserver.a proxygenlib.a wangle.a folly.a boost_context-mt boost_filesystem-mt boost_system-mt double-conversion glog gflags event ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} pthread z)
 
 add_subdirectory(test)

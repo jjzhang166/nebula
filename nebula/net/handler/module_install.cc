@@ -37,5 +37,13 @@ void InstallModule() {
   // teamtalk
   // extern void ModuleTeamtalkInitialize();
   // ModuleTeamtalkInitialize();
+  
+  // telegram
+  // extern void ModuleTelegramInitialize();
+  // ModuleTelegramInitialize();
+  
+  // mtproto
+  extern void ModuleMTProtoInitialize();
+  ModuleMTProtoInitialize();
 }
 

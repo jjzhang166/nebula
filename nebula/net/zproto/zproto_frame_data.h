@@ -26,7 +26,8 @@
 #include "nebula/base/self_register_factory_manager.h"
 
 //////////////////////////////////////////////////////////////////////
-
+namespace zproto {
+  
 // 数据包体最大长度
 #define MAX_FRAME_BODY_LEN 1024*1024 // 1MB
 
@@ -433,7 +434,9 @@ struct MarsSignal : public FrameMessage {
   }
 };
 
-using FrameFactory = nebula::SelfRegisterFactoryManager<FrameMessage, uint8_t>;
+}
+
+using FrameFactory = nebula::SelfRegisterFactoryManager<zproto::FrameMessage, uint8_t>;
 
 #endif // NUBULA_NET_ZPROTO_ZPROTO_FRAME_DATA_H_
 

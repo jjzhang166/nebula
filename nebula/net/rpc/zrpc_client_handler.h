@@ -25,15 +25,15 @@
 
 // A real rpc server would probably use generated client/server stubs
 class ZRpcClientHandler : public nebula::NebulaBaseHandler, public wangle::Handler<
-  PackageMessagePtr, ProtoRpcResponsePtr,
-  RpcRequestPtr, std::unique_ptr<folly::IOBuf>> {
+  zproto::PackageMessagePtr, zproto::ProtoRpcResponsePtr,
+  zproto::RpcRequestPtr, std::unique_ptr<folly::IOBuf>> {
 public:
   explicit ZRpcClientHandler(nebula::ServiceBase* service)
     : NebulaBaseHandler(service) {}
 
-  virtual void read(Context* ctx, PackageMessagePtr msg) override;
+  virtual void read(Context* ctx, zproto::PackageMessagePtr msg) override;
 
-  virtual folly::Future<folly::Unit> write(Context* ctx, RpcRequestPtr req) override;
+  virtual folly::Future<folly::Unit> write(Context* ctx, zproto::RpcRequestPtr req) override;
   
   virtual void readEOF(Context* ctx) override;
   virtual void readException(Context* ctx, folly::exception_wrapper e) override;
@@ -43,7 +43,7 @@ public:
 
   // virtual folly::Future<folly::Unit> close(Context* ctx) override;
 
-  folly::Future<ProtoRpcResponsePtr> ServiceCall(RpcRequestPtr arg);
+  folly::Future<zproto::ProtoRpcResponsePtr> ServiceCall(zproto::RpcRequestPtr arg);
 
 protected:
   // TODO(@benqi): s2s应用场景里，连接发起方需要保活，逻辑基本一样，

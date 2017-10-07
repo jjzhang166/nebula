@@ -26,6 +26,8 @@
 // 保活心跳
 #define HEARTBEAT_TIMEOUT 10000 // 心跳间隔时间：10s
 
+using namespace zproto;
+
 void ZRpcClientHandler::read(Context* ctx, PackageMessagePtr msg) {
   LOG(INFO) << "read - received data: " << msg->ToString();
   auto received = std::static_pointer_cast<ProtoRpcResponse>(msg);

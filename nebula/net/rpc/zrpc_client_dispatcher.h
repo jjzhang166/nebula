@@ -25,11 +25,11 @@
 
 // #include "nebula/net/rpc/zrpc_client_handler.h"
 
-using ZRpcClientPipeline = wangle::Pipeline<folly::IOBufQueue&, RpcRequestPtr>;
+using ZRpcClientPipeline = wangle::Pipeline<folly::IOBufQueue&, zproto::RpcRequestPtr>;
 
 // Client multiplex dispatcher.  Uses Bonk.type as request ID
 class ZRpcMultiplexClientDispatcher : public wangle::ClientDispatcherBase<
-    ZRpcClientPipeline, RpcRequestPtr, ProtoRpcResponsePtr> {
+    ZRpcClientPipeline, zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr> {
 public:
   ~ZRpcMultiplexClientDispatcher() {
     Clear();
@@ -39,9 +39,9 @@ public:
     // ZRpcClientPipeline, RpcRequestPtr, ProtoRpcResponsePtr>::~ClientDispatcherBase();
   }
       
-  void read(Context* ctx, ProtoRpcResponsePtr in) override;
+  void read(Context* ctx, zproto::ProtoRpcResponsePtr in) override;
 
-  folly::Future<ProtoRpcResponsePtr> operator()(RpcRequestPtr arg) override;
+  folly::Future<zproto::ProtoRpcResponsePtr> operator()(zproto::RpcRequestPtr arg) override;
 
   // Print some nice messages for close
   virtual folly::Future<folly::Unit> close() override;
@@ -50,14 +50,14 @@ public:
   void Clear();
   
 private:
-  std::unordered_map<int64_t, folly::Promise<ProtoRpcResponsePtr>> requests_;
+  std::unordered_map<int64_t, folly::Promise<zproto::ProtoRpcResponsePtr>> requests_;
 };
 
 // template <typename Req, typename Resp = Req>
-class ZRpcClientFilter : public wangle::ServiceFilter<RpcRequestPtr, ProtoRpcResponsePtr> {
+class ZRpcClientFilter : public wangle::ServiceFilter<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr> {
 public:
-  explicit ZRpcClientFilter(std::shared_ptr<wangle::Service<RpcRequestPtr, ProtoRpcResponsePtr>> service)
-    : ServiceFilter<RpcRequestPtr, ProtoRpcResponsePtr>(service) {}
+  explicit ZRpcClientFilter(std::shared_ptr<wangle::Service<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr>> service)
+    : ServiceFilter<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr>(service) {}
   
   ~ZRpcClientFilter() {
   }
@@ -66,7 +66,7 @@ public:
 //    service_->Clear();
 //  }
   
-  virtual folly::Future<ProtoRpcResponsePtr> operator()(RpcRequestPtr req) override;
+  virtual folly::Future<zproto::ProtoRpcResponsePtr> operator()(zproto::RpcRequestPtr req) override;
 };
 
 #endif

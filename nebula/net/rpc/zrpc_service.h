@@ -24,9 +24,9 @@
 #include "nebula/base/func_factory_manager.h"
 #include "nebula/net/zproto/zproto_package_data.h"
 
-class ZRpcService : public wangle::Service<RpcRequestPtr, ProtoRpcResponsePtr> {
+class ZRpcService : public wangle::Service<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr> {
 public:
-  virtual folly::Future<ProtoRpcResponsePtr> operator()(RpcRequestPtr request) override;
+  virtual folly::Future<zproto::ProtoRpcResponsePtr> operator()(zproto::RpcRequestPtr request) override;
 };
 
 /*

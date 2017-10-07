@@ -17,6 +17,8 @@
 
 #include "nebula/net/rpc/zrpc_server_handler.h"
 
+using namespace zproto;
+
 void ZRpcServerHandler::read(Context* ctx, PackageMessagePtr msg) {
   LOG(INFO) << "read - received data: "; // << msg;
   auto received = std::static_pointer_cast<RpcRequest>(msg);

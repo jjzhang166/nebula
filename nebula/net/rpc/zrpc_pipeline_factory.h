@@ -48,7 +48,7 @@ public:
   ZRpcServerPipeline::Ptr newPipeline(std::shared_ptr<folly::AsyncTransportWrapper> sock) override;
   
 private:
-  wangle::ExecutorFilter<RpcRequestPtr, ProtoRpcResponsePtr> rpc_service_{
+  wangle::ExecutorFilter<zproto::RpcRequestPtr, zproto::ProtoRpcResponsePtr> rpc_service_{
     std::make_shared<wangle::CPUThreadPoolExecutor>(10),
     std::make_shared<ZRpcService>()};
   

@@ -19,6 +19,8 @@
 
 #include "nebula/base/id_util.h"
 
+using namespace zproto;
+
 void ZRpcMultiplexClientDispatcher::read(Context* ctx, ProtoRpcResponsePtr in) {
   LOG(INFO) << "read - " << in->ToString();
   

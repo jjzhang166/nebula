@@ -29,9 +29,9 @@ struct ZRpcUtil {
     return g_instance;
   }
   
-  using  ServiceFunc = std::function<ProtoRpcResponsePtr(RpcRequestPtr)>;
+  using  ServiceFunc = std::function<zproto::ProtoRpcResponsePtr(zproto::RpcRequestPtr)>;
 
-  static folly::Future<ProtoRpcResponsePtr> DoClientCall(const std::string& service_name, RpcRequestPtr request);
+  static folly::Future<zproto::ProtoRpcResponsePtr> DoClientCall(const std::string& service_name, zproto::RpcRequestPtr request);
   
   static void Register(int method_id, ServiceFunc f);
   
@@ -40,7 +40,7 @@ struct ZRpcUtil {
   
 protected:
   friend class ZRpcService;
-  static ProtoRpcResponsePtr DoServiceCall(RpcRequestPtr request);
+  static zproto::ProtoRpcResponsePtr DoServiceCall(zproto::RpcRequestPtr request);
   
   // TODO(@benqi): 使用FuncFactoryManager
   std::map<int, ServiceFunc> g_rpc_services;

@@ -43,3 +43,19 @@ set (SRC_HTTP_CLIENT_TEST_LIST
 
 add_executable (http_client_test ${SRC_HTTP_CLIENT_TEST_LIST})
 target_link_libraries (http_client_test net base)
+
+
+set (SRC_TELEGRAM_HANDSHAKE_TEST_LIST
+  telegram_handshake_test.cc
+  )
+
+add_executable (telegram_handshake_test ${SRC_TELEGRAM_HANDSHAKE_TEST_LIST})
+target_link_libraries (telegram_handshake_test net base)
+
+set (SRC_TELEGRAM_SERVER_TEST_LIST
+  telegram_server_test.cc
+  )
+
+add_executable (telegram_server_test ${SRC_TELEGRAM_SERVER_TEST_LIST})
+target_link_libraries (telegram_server_test net base)
+

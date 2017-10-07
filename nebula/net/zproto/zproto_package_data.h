@@ -22,6 +22,8 @@
 
 #include "nebula/net/zproto/zproto_frame_data.h"
 
+namespace zproto {
+  
 //////////////////////////////////////////////////////////////////////
 struct PackageHeader {
   std::string ToString() const;
@@ -218,7 +220,7 @@ struct PackageMessage {
 
   // birth_timetick
   inline uint64_t birth_timetick() const {
-    return attach_data.proto_revision;
+    return attach_data.birth_timetick;
   }
   inline void set_birth_timetick(uint64_t v) {
     attach_data.birth_timetick = v;
@@ -316,6 +318,7 @@ struct PackageMessage {
   
   bool SerializeToIOBuf(std::unique_ptr<folly::IOBuf>& io_buf) const;
   virtual uint32_t CalcPackageSize() const { return Package::HEADER_LEN; }
+  
   virtual void Encode(IOBufWriter& iobw) const {
     iobw.writeBE(package_header.auth_id);
     iobw.writeBE(package_header.session_id);
@@ -582,36 +585,41 @@ struct EncodedMessage {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
+/*
 template <typename T>
 struct ProtoBox  {
+  ProtoBox() {}
+  explicit ProtoBox(std::shared_ptr<T>) {}
+  
   // 通过指针方式直接使用MESSAGE
   T& operator*() {
-    return message;
+    return *message;
   }
   
   const T& operator*() const {
-    return message;
+    return *message;
   }
   
   T* operator->() {
-    return &message;
+    return message.get();
   }
   
   const T* operator->() const {
-    return &message;
+    return message.get();
   }
   
   T* get() {
-    return &message;
+    return message.get();
   }
   
   const T* get() const {
-    return &message;
+    return message.get();
   }
   
-  T message;
+  std::shared_ptr<T> message;
 };
-
+*/
+  
 // RPC用
 struct ProtoRpcRequest : public PackageMessage {
   bool CheckPackageType() const {
@@ -652,43 +660,79 @@ using ProtoPushPtr = std::shared_ptr<ProtoPush>;
 
 ///////////////////////////////////////////////////////////////////////////////////////
 struct RpcRequest : public ProtoRpcRequest {
+  enum {
+    HEADER = Package::RPC_REQUEST,
+  };
+
+  RpcRequest() = default;
+  explicit RpcRequest(uint32_t _method_id, std::unique_ptr<folly::IOBuf> buf) {
+    method_id = _method_id;
+    body = std::move(buf);
+    // payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+  }
+
+  uint8_t GetPackageType() const override {
+    return HEADER;
+  }
+  
   bool Decode(Package& package) override {
     PackageMessage::Decode(package);
     folly::io::Cursor c(package.message.get());
     // req_message_id = c.readBE<int64_t>();
     method_id = c.readBE<uint32_t>();
     nebula::io_buf_util::TrimStart(package.message.get(), sizeof(method_id));
-    
+    body.swap(package.message);
     return true;
   }
   
   void Encode(IOBufWriter& iobw) const override {
     PackageMessage::Encode(iobw);
     iobw.writeBE(GetMethodID());
-    //folly::io::Cursor c(body.get());
-    //    iobw.push(c, static_cast<uint32_t>(body->computeChainDataLength()));
+    folly::io::Cursor c(body.get());
+    iobw.push(c, static_cast<uint32_t>(body->computeChainDataLength()));
   }
 
   uint32_t CalcPackageSize() const override {
-    return sizeof(method_id);
+    // CHECK(true);
+    
+    return sizeof(method_id) + body->computeChainDataLength();
     // + static_cast<uint32_t>(message.ByteSize());
   }
 
-  virtual uint32_t GetMethodID() const = 0;
+  virtual uint32_t GetMethodID() const {
+    return method_id;
+  }
+
+  virtual std::string ToString() const override {
+    return folly::sformat("{{base: {}, method_id: {}, encoded: {}}}",
+                          PackageMessage::ToString(),
+                          method_id,
+                          "");
+  }
 
   // ID of API Method Request
   uint32_t method_id; //: int
   // Encoded Request
   // body: bytes
-  // mutable std::unique_ptr<folly::IOBuf> body;
+  mutable std::unique_ptr<folly::IOBuf> body;
 };
 
 using RpcRequestPtr = std::shared_ptr<RpcRequest>;
 
-struct EncodedRpcRequest : public RpcRequest, public ProtoBox<EncodedMessage> {
+/*
+struct EncodedRpcRequest : public RpcRequest {
   enum {
     HEADER = Package::RPC_REQUEST,
   };
+  
+  // TODO(@benqi): 增加序列化、反序列化标志
+  EncodedRpcRequest() = default;
+  
+  explicit EncodedRpcRequest(uint32_t _method_id, std::unique_ptr<folly::IOBuf> buf) {
+    method_id = _method_id;
+    payload = std::move(buf);
+    payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+  }
   
   uint8_t GetPackageType() const override {
     return HEADER;
@@ -697,7 +741,9 @@ struct EncodedRpcRequest : public RpcRequest, public ProtoBox<EncodedMessage> {
   bool Decode(Package& package) override {
     try {
       RpcRequest::Decode(package);
-      message.Decode(package);
+      payload.swap(package.message);
+      payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+      // message->Decode(package);
     } catch(...) {
       // TODO(@benqi): error's log
       return false;
@@ -707,13 +753,15 @@ struct EncodedRpcRequest : public RpcRequest, public ProtoBox<EncodedMessage> {
   }
 
   uint32_t CalcPackageSize() const override {
-    return RpcRequest::CalcPackageSize() + message.ByteSize();
+    return RpcRequest::CalcPackageSize() + payload_size;
   }
 
   void Encode(IOBufWriter& iobw) const override {
     try {
       RpcRequest::Encode(iobw);
-      message.Encode(iobw);
+      folly::io::Cursor c(payload.get());
+      iobw.push(c, payload_size);
+      // message->Encode(iobw);
     } catch(...) {
       
     }
@@ -727,13 +775,31 @@ struct EncodedRpcRequest : public RpcRequest, public ProtoBox<EncodedMessage> {
     return folly::sformat("{{base: {}, method_id: {}, encoded: {}}}",
                           RpcRequest::ToString(),
                           method_id,
-                          message.ToString());
+                          "");
   }
-
+  
+  // std::shared_ptr<EncodedMessage> message;
+  std::unique_ptr<folly::IOBuf> payload;
+  uint32_t payload_size {0};
 };
-
+*/
+  
 // Successful RPC
 struct RpcOk : public ProtoRpcResponse {
+  enum {
+    HEADER = Package::RPC_OK,
+  };
+  
+  RpcOk() = default;
+  explicit RpcOk(uint32_t _method_response_id, std::unique_ptr<folly::IOBuf> buf) {
+    method_response_id = _method_response_id;
+    body = std::move(buf);
+  }
+  
+  uint8_t GetPackageType() const override {
+    return HEADER;
+  }
+
   bool Decode(Package& package) override {
     PackageMessage::Decode(package);
     try {
@@ -743,6 +809,8 @@ struct RpcOk : public ProtoRpcResponse {
       
       // TODO(@benqi): 使用c已读长度
       nebula::io_buf_util::TrimStart(package.message.get(), sizeof(req_message_id) + sizeof(method_response_id));
+      body.swap(package.message);
+
     } catch(...) {
       // TODO(@wubenqi): error's log
       return false;
@@ -759,24 +827,42 @@ struct RpcOk : public ProtoRpcResponse {
     PackageMessage::Encode(iobw);
     iobw.writeBE(req_message_id);
     iobw.writeBE(GetMethodResponseID());
-    //folly::io::Cursor c(body.get());
-//    iobw.push(c, static_cast<uint32_t>(body->computeChainDataLength()));
+    folly::io::Cursor c(body.get());
+    iobw.push(c, static_cast<uint32_t>(body->computeChainDataLength()));
   }
   
-  virtual uint32_t GetMethodResponseID() const = 0;
+  uint32_t GetMethodResponseID() const {
+    return method_response_id;
+  }
+  
+  virtual std::string ToString() const override {
+    return folly::sformat("{{base: {}, req_message_id: {}, method_response_id: {}, encoded: {}}}",
+                          ProtoRpcResponse::ToString(),
+                          req_message_id,
+                          method_response_id,
+                          "");
+  }
 
   // ID of API Method Response
   uint32_t method_response_id; // : int
   // Encoded response
   // body: bytes
-  // mutable std::unique_ptr<folly::IOBuf> body;
+  mutable std::unique_ptr<folly::IOBuf> body;
 };
 
-struct EncodedRpcOk : public RpcOk, public ProtoBox<EncodedMessage> {
+/*
+struct EncodedRpcOk : public RpcOk {
   enum {
     HEADER = Package::RPC_OK,
   };
   
+  EncodedRpcOk() = default;
+  explicit EncodedRpcOk(uint32_t _method_response_id, std::unique_ptr<folly::IOBuf> buf) {
+    method_response_id = _method_response_id;
+    payload = std::move(buf);
+    payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+  }
+
   uint8_t GetPackageType() const override {
     return HEADER;
   }
@@ -784,7 +870,8 @@ struct EncodedRpcOk : public RpcOk, public ProtoBox<EncodedMessage> {
   bool Decode(Package& package) override {
     try {
       RpcOk::Decode(package);
-      message.Decode(package);
+      payload.swap(package.message);
+      payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
     } catch(...) {
       // TODO(@benqi): error's log
       return false;
@@ -794,13 +881,14 @@ struct EncodedRpcOk : public RpcOk, public ProtoBox<EncodedMessage> {
   }
 
   uint32_t CalcPackageSize() const override {
-    return RpcOk::CalcPackageSize() + message.ByteSize();
+    return RpcOk::CalcPackageSize() + payload_size;
   }
 
   void Encode(IOBufWriter& iobw) const override {
     try {
       RpcOk::Encode(iobw);
-      message.Encode(iobw);
+      folly::io::Cursor c(payload.get());
+      iobw.push(c, payload_size);
     } catch(...) {
     }
   }
@@ -814,11 +902,15 @@ struct EncodedRpcOk : public RpcOk, public ProtoBox<EncodedMessage> {
                           RpcOk::ToString(),
                           req_message_id,
                           method_response_id,
-                          message.ToString());
+                          "");
   }
 
+  // std::shared_ptr<EncodedMessage> message;
+  std::unique_ptr<folly::IOBuf> payload;
+  uint32_t payload_size {0};
 };
-
+*/
+  
 // RPC Error
 struct RpcError : public ProtoRpcResponse {
   enum {
@@ -1012,40 +1104,63 @@ struct RpcInternalError : public ProtoRpcResponse {
 };
 
 struct Push : public ProtoPush {
+  enum {
+    HEADER = Package::PUSH,
+  };
+  
+  Push() = default;
+  explicit Push(std::unique_ptr<folly::IOBuf> buf) {
+    body = std::move(buf);
+    // payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+  }
+  
+  uint8_t GetPackageType() const override {
+    return HEADER;
+  }
+
   bool Decode(Package& package) override {
     PackageMessage::Decode(package);
     folly::io::Cursor c(package.message.get());
     
     update_id = c.readBE<int32_t>();
     nebula::io_buf_util::TrimStart(package.message.get(), 4);
+    body.swap(package.message);
+
     return true;
   }
   
   uint32_t CalcPackageSize() const override {
-    return sizeof(update_id); // + static_cast<int32_t>(body->computeChainDataLength());
+    return sizeof(update_id) + static_cast<int32_t>(body->computeChainDataLength());
   }
   
   void Encode(IOBufWriter& iobw) const override {
     PackageMessage::Encode(iobw);
     iobw.writeBE(update_id);
-    // folly::io::Cursor c(body.get());
-    // iobw.push(c, static_cast<int32_t>(body->computeChainDataLength()));
+    folly::io::Cursor c(body.get());
+    iobw.push(c, static_cast<int32_t>(body->computeChainDataLength()));
   }
   
   // Push Entity Id
   int32_t update_id; //: int
   // Encoded Push body
-  // mutable std::unique_ptr<folly::IOBuf> body;
+  mutable std::unique_ptr<folly::IOBuf> body;
 };
 
 using PushPtr = std::shared_ptr<Push>;
 
+/*
 /////////////////////////////////////////////////////////////////////////////////////////////////
-struct EncodedPush : public Push, public ProtoBox<EncodedMessage> {
+struct EncodedPush : public Push {
   enum {
     HEADER = Package::PUSH,
   };
   
+  EncodedPush() = default;
+  explicit EncodedPush(std::unique_ptr<folly::IOBuf> buf) {
+    payload = std::move(buf);
+    payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
+  }
+
   uint8_t GetPackageType() const override {
     return HEADER;
   }
@@ -1053,7 +1168,8 @@ struct EncodedPush : public Push, public ProtoBox<EncodedMessage> {
   bool Decode(Package& package) override {
     try {
       Push::Decode(package);
-      message.Decode(package);
+      payload.swap(package.message);
+      payload_size = static_cast<uint32_t>(payload->computeChainDataLength());
     } catch(...) {
       // TODO(@benqi): error's log
       return false;
@@ -1063,19 +1179,23 @@ struct EncodedPush : public Push, public ProtoBox<EncodedMessage> {
   }
   
   uint32_t CalcPackageSize() const override {
-    return Push::CalcPackageSize() + message.ByteSize();
+    return Push::CalcPackageSize() + payload_size;
   }
   
   void Encode(IOBufWriter& iobw) const override {
     try {
       Push::Encode(iobw);
-      message.Encode(iobw);
+      folly::io::Cursor c(payload.get());
+      iobw.push(c, payload_size);
     } catch(...) {
     }
   }
 
+  std::unique_ptr<folly::IOBuf> payload;
+  uint32_t payload_size {0};
 };
-
+*/
+  
 struct MessageAck : public PackageMessage {
   enum {
     HEADER = Package::MESSAGE_ACK,
@@ -1277,7 +1397,9 @@ struct Container : public PackageMessage {
   std::list<PackageMessagePtr> data;
 };
 
-using PackageFactory = nebula::SelfRegisterFactoryManager<PackageMessage, uint8_t>;
+}
+
+using PackageFactory = nebula::SelfRegisterFactoryManager<zproto::PackageMessage, uint8_t>;
 
 #endif // NUBULA_NET_ZPROTO_ZPROTO_PACKAGE_DATA_H_
 

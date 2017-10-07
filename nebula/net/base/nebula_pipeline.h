@@ -28,6 +28,8 @@ using PipelineBasePtr = std::shared_ptr<wangle::PipelineBase>;
 using EchoPipeline = wangle::Pipeline<folly::IOBufQueue&, std::string>;
 using DefaultPipeline = wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
 using ZProtoPipeline = wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
+using TelegramPipeline = wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
+using MTProtoPipeline = wangle::Pipeline<folly::IOBufQueue&, std::unique_ptr<folly::IOBuf>>;
 
 // hack...
 template <class W>

@@ -48,6 +48,50 @@
 // decrypt_key_: 0  ~ 31 (temp)
 // decrypt_iv_ : 32 ~ 47 (temp)
 //
+/*
+{
+  buffer->position(64);
+  static uint8_t temp[64];
+  while (true) {
+    RAND_bytes(bytes, 64);
+    uint32_t val = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | (bytes[0]);
+    uint32_t val2 = (bytes[7] << 24) | (bytes[6] << 16) | (bytes[5] << 8) | (bytes[4]);
+    if (bytes[0] != 0xef &&
+        val != 0x44414548 &&
+        val != 0x54534f50 &&
+        val != 0x20544547 &&
+        val != 0x4954504f &&
+        val != 0xeeeeeeee &&
+        val2 != 0x00000000) {
+      bytes[56] = bytes[57] = bytes[58] = bytes[59] = 0xef;
+      break;
+    }
+  }
+  for (int a = 0; a < 48; a++) {
+    temp[a] = bytes[55 - a];
+  }
+  
+  encryptNum = decryptNum = 0;
+  memset(encryptCount, 0, 16);
+  memset(decryptCount, 0, 16);
+  
+  if (AES_set_encrypt_key(bytes + 8, 256, &encryptKey) < 0) {
+    DEBUG_E("unable to set encryptKey");
+    exit(1);
+  }
+  memcpy(encryptIv, bytes + 40, 16);
+  
+  if (AES_set_encrypt_key(temp, 256, &decryptKey) < 0) {
+    DEBUG_E("unable to set decryptKey");
+    exit(1);
+  }
+  memcpy(decryptIv, temp + 32, 16);
+  
+  AES_ctr128_encrypt(bytes, temp, 64, &encryptKey, encryptIv, encryptCount, &encryptNum);
+  memcpy(bytes + 56, temp + 56, 8);
+
+}
+*/
 AuthKeyGenerator::AuthKeyGenerator() {
   // 生成nonce
   do {
@@ -81,6 +125,19 @@ AuthKeyGenerator::AuthKeyGenerator(folly::ByteRange key) {
   // 检查key有效性
   uint32_t val = (key[3] << 24) | (key[2] << 16) | (key[1] << 8) | (key[0]);
   uint32_t val2 = (key[7] << 24) | (key[6] << 16) | (key[5] << 8) | (key[4]);
+  if (key[0] != 0xef &&
+      val != 0x44414548 &&
+      val != 0x54534f50 &&
+      val != 0x20544547 &&
+      val != 0x4954504f &&
+      val != 0xeeeeeeee &&
+      val2 != 0x00000000) {
+  } else {
+    LOG(ERROR) << "AuthKeyGenerator - throw exception: invalid key: " << ToHexStr(key);
+    throw std::runtime_error("invalid key");
+  }
+
+/*
   if (key[0]  == 0xef    ||
       val  == 0x44414548 ||
       val  == 0x54534f50 ||
@@ -95,6 +152,7 @@ AuthKeyGenerator::AuthKeyGenerator(folly::ByteRange key) {
     LOG(ERROR) << "AuthKeyGenerator - throw exception: invalid key: " << ToHexStr(key);
     throw std::runtime_error("invalid key");
   }
+ */
   
   // 生成nonce
   memcpy(nonce_.data(), key.data(), key.size());
@@ -114,6 +172,17 @@ AesCtrEncrypt::AesCtrEncrypt(folly::ByteRange key, folly::ByteRange iv) {
 
   AES_set_encrypt_key(key.data(), 256, &aes_key_);
   memcpy(aes_ctr_state_.ivec, iv.data(), 16);
+}
+
+AesCtrEncrypt::AesCtrEncrypt(uint8_t* key, int key_len, uint8_t* iv, int iv_len) {
+  // 检测key和iv的长度
+  if (UNLIKELY(key_len != 32 ||
+               iv_len != 16)) {
+    throw std::out_of_range("underflow");
+  }
+  
+  AES_set_encrypt_key(key, 256, &aes_key_);
+  memcpy(aes_ctr_state_.ivec, iv, 16);
 }
 
 uint32_t AesCtrEncrypt::Encrypt(const uint8_t* in, uint8_t* out, uint32_t len) {
@@ -147,7 +216,7 @@ uint32_t AesCtrEncrypt::Encrypt(folly::IOBuf* io_buf, uint32_t len) {
 }
 
 void AesCtrEncrypt::Encrypt(folly::IOBuf* io_buf) {
-  if (io_buf->isChained()) {
+  if (!io_buf->isChained()) {
     Encrypt(io_buf->data(), io_buf->writableData(), static_cast<uint32_t>(io_buf->length()));
   } else {
     
@@ -156,6 +225,26 @@ void AesCtrEncrypt::Encrypt(folly::IOBuf* io_buf) {
         Encrypt(end->data(), end->writableData(), static_cast<uint32_t>(end->length()));
         end = end->next();
     } while (end != io_buf);
+  }
+}
+
+
+void aesIgeEncryption(uint8_t *buffer, uint8_t *key, uint8_t *iv, bool encrypt, bool changeIv, uint32_t length) {
+  uint8_t *ivBytes = iv;
+  if (!changeIv) {
+    ivBytes = new uint8_t[32];
+    memcpy(ivBytes, iv, 32);
+  }
+  AES_KEY akey;
+  if (!encrypt) {
+    AES_set_decrypt_key(key, 32 * 8, &akey);
+    AES_ige_encrypt(buffer, buffer, length, &akey, ivBytes, AES_DECRYPT);
+  } else {
+    AES_set_encrypt_key(key, 32 * 8, &akey);
+    AES_ige_encrypt(buffer, buffer, length, &akey, ivBytes, AES_ENCRYPT);
+  }
+  if (!changeIv) {
+    delete [] ivBytes;
   }
 }
 

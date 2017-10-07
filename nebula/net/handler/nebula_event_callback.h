@@ -48,7 +48,7 @@ struct NebulaEventCallback {
 
   static int OnDataReceived(Pipeline* pipeline, Message message_data) {
     if (g_data_received) {
-      return g_data_received(pipeline, message_data);
+      return g_data_received(pipeline, std::forward<Message>(message_data));
     } else {
       return -1;
     }

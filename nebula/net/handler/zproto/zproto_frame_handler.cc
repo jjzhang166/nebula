@@ -24,6 +24,8 @@
 
 #include "nebula/base/func_factory_manager.h"
 
+using namespace zproto;
+
 ///////////////////////////////////////////////////////////////////////////////////////
 // 初始化
 typedef void(ZProtoFrameHandler::*ExecHandler)(ZProtoFrameHandler::Context*, std::shared_ptr<FrameMessage>);

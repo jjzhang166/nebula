@@ -25,8 +25,7 @@
 
 #include "nebula/net/rpc/zrpc_service_util.h"
 
-
-folly::Future<ProtoRpcResponsePtr> ZRpcService::operator()(RpcRequestPtr request) {
+folly::Future<zproto::ProtoRpcResponsePtr> ZRpcService::operator()(zproto::RpcRequestPtr request) {
   LOG(INFO) << "ZRpcService - recv request: " << request->ToString();
   
   return ZRpcUtil::DoServiceCall(request);
